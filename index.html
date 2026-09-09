@@ -66,6 +66,9 @@
             const [userNip, setUserNip] = useState(() => {
                 return localStorage.getItem('kbc_user_nip') || '';
             });
+            const [googleSheetUrl, setGoogleSheetUrl] = useState(() => {
+                return localStorage.getItem('kbc_sheet_url') || '';
+            });
 
             const [activeTab, setActiveTab] = useState('dashboard');
             
@@ -79,8 +82,9 @@
                 return madrasahList.length > 0 ? madrasahList[0].id : '';
             });
 
-            // Modal Edit Profil Pengawas
+            // Modal Edit Profil Pengawas & Setting Sheet
             const [showProfileModal, setShowProfileModal] = useState(false);
+            const [isSyncing, setIsSyncing] = useState(false);
 
             // Logging Pendampingan 4 Tahap KBC
             const [coachingSession, setCoachingSession] = useState({
@@ -103,10 +107,8 @@
                     cintaAlamLingkungan: 4,
                     cintaTanahAir: 4
                 },
-                implementasiNote: '',
 
-                umpanBalikKonstruktif: '',
-                isSyncedToMAGIS: true
+                umpanBalikKonstruktif: ''
             });
 
             const [coachingLogs, setCoachingLogs] = useState(() => {
@@ -135,19 +137,46 @@
                 return madrasahList.find(m => m.id === selectedMadrasahId) || (madrasahList.length > 0 ? madrasahList[0] : null);
             }, [madrasahList, selectedMadrasahId]);
 
-            const handleSaveSession = () => {
+            const handleSaveSession = async () => {
                 if (!activeMadrasah) {
                     alert('Silakan tambahkan madrasah binaan terlebih dahulu!');
                     return;
                 }
+
+                const timestamp = new Date().toLocaleString('id-ID');
                 const newLog = {
                     ...coachingSession,
                     id: 'log-' + Date.now(),
                     madrasahName: activeMadrasah.name,
-                    timestamp: new Date().toLocaleString('id-ID')
+                    supervisorName: currentUser,
+                    supervisorNip: userNip,
+                    timestamp: timestamp
                 };
+
+                setIsSyncing(true);
+
+                // Kirim data ke Google Sheets jika URL diisi
+                if (googleSheetUrl.trim()) {
+                    try {
+                        await fetch(googleSheetUrl.trim(), {
+                            method: 'POST',
+                            mode: 'no-cors', // Menghindari batasan CORS Google Apps Script
+                            headers: {
+                                'Content-Type': 'text/plain;charset=utf-8',
+                            },
+                            body: JSON.stringify(newLog)
+                        });
+                        alert('Sesi Pendampingan KBC Berhasil Disimpan & Terkirim ke Google Sheets!');
+                    } catch (error) {
+                        console.error("Gagal sinkronisasi Google Sheets:", error);
+                        alert('Sesi Pendampingan tersimpan secara lokal, namun gagal terhubung ke Google Sheets.');
+                    }
+                } else {
+                    alert('Sesi Pendampingan tersimpan secara lokal!\n(Petunjuk: Hubungkan dengan Google Sheets pada menu Profil agar data otomatis masuk ke spreadsheet).');
+                }
+
+                setIsSyncing(false);
                 setCoachingLogs([newLog, ...coachingLogs]);
-                alert('Sesi Pendampingan KBC 4-Tahap Berhasil Disimpan!');
                 setActiveTab('reports');
             };
 
@@ -169,8 +198,9 @@
                 e.preventDefault();
                 localStorage.setItem('kbc_user_name', currentUser);
                 localStorage.setItem('kbc_user_nip', userNip);
+                localStorage.setItem('kbc_sheet_url', googleSheetUrl);
                 setShowProfileModal(false);
-                alert('Profil Pengawas Berhasil Diperbarui!');
+                alert('Profil & Konfigurasi Google Sheets Berhasil Diperbarui!');
             };
 
             if (!isAuthenticated) {
@@ -232,10 +262,15 @@
                                 <button 
                                     onClick={() => setShowProfileModal(true)}
                                     className="flex items-center gap-1.5 px-2 py-1 hover:bg-emerald-700 rounded-lg text-emerald-200 transition"
-                                    title="Klik untuk edit profil"
+                                    title="Klik untuk edit profil & Google Sheets"
                                 >
                                     <i data-lucide="user-check" className="w-4 h-4 text-amber-400 shrink-0"></i>
                                     <span className="font-semibold text-white max-w-[120px] truncate">{currentUser || 'Pengawas'}</span>
+                                    {googleSheetUrl ? (
+                                        <span className="w-2 h-2 rounded-full bg-emerald-400" title="Google Sheets Terhubung"></span>
+                                    ) : (
+                                        <span className="w-2 h-2 rounded-full bg-amber-400" title="Google Sheets Belum Dihubungkan"></span>
+                                    )}
                                 </button>
 
                                 <button 
@@ -255,11 +290,13 @@
                                 madrasahList={madrasahList} 
                                 coachingLogs={coachingLogs}
                                 currentUser={currentUser}
+                                googleSheetUrl={googleSheetUrl}
                                 onStartCoaching={(mId) => {
                                     setSelectedMadrasahId(mId);
                                     setActiveTab('coaching');
                                 }}
                                 onGoToMadrasah={() => setActiveTab('madrasah')}
+                                onOpenSettings={() => setShowProfileModal(true)}
                             />
                         )}
 
@@ -271,6 +308,8 @@
                                 coachingSession={coachingSession}
                                 setCoachingSession={setCoachingSession}
                                 handleSaveSession={handleSaveSession}
+                                isSyncing={isSyncing}
+                                googleSheetUrl={googleSheetUrl}
                                 onGoToMadrasah={() => setActiveTab('madrasah')}
                             />
                         )}
@@ -291,46 +330,74 @@
                                 coachingLogs={coachingLogs}
                                 currentUser={currentUser}
                                 userNip={userNip}
+                                googleSheetUrl={googleSheetUrl}
                             />
                         )}
                     </main>
 
-                    {/* MODAL EDIT PROFIL PENGAWAS */}
+                    {/* MODAL EDIT PROFIL PENGAWAS & GOOGLE SHEETS */}
                     {showProfileModal && (
                         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-                            <div className="bg-white rounded-2xl max-w-md w-full p-6 space-y-4 shadow-xl">
+                            <div className="bg-white rounded-2xl max-w-lg w-full p-6 space-y-4 shadow-xl">
                                 <div className="flex justify-between items-center border-b pb-3">
                                     <h3 className="font-bold text-slate-800 text-base flex items-center gap-2">
                                         <i data-lucide="user-cog" className="w-5 h-5 text-emerald-700"></i>
-                                        Edit Profil Pengawas
+                                        Pengaturan Profil & Database
                                     </h3>
                                     <button onClick={() => setShowProfileModal(false)} className="text-slate-400 hover:text-slate-600">✕</button>
                                 </div>
-                                <form onSubmit={handleUpdateProfile} className="space-y-3 text-xs">
-                                    <div>
-                                        <label className="block font-bold text-slate-700 mb-1">Nama Lengkap & Gelar:</label>
-                                        <input 
-                                            type="text" 
-                                            value={currentUser} 
-                                            onChange={(e) => setCurrentUser(e.target.value)} 
-                                            required
-                                            className="w-full border p-2.5 rounded-xl focus:ring-2 focus:ring-emerald-600"
-                                            placeholder="Contoh: Dedi Efendi, S.Pd., M.PFis."
-                                        />
+                                <form onSubmit={handleUpdateProfile} className="space-y-4 text-xs">
+                                    <div className="space-y-3 bg-slate-50 p-3.5 rounded-xl border">
+                                        <h4 className="font-bold text-emerald-900 flex items-center gap-1.5">
+                                            <i data-lucide="user" className="w-4 h-4 text-emerald-700"></i>
+                                            Identitas Pengawas
+                                        </h4>
+                                        <div>
+                                            <label className="block font-bold text-slate-700 mb-1">Nama Lengkap & Gelar:</label>
+                                            <input 
+                                                type="text" 
+                                                value={currentUser} 
+                                                onChange={(e) => setCurrentUser(e.target.value)} 
+                                                required
+                                                className="w-full border p-2.5 rounded-xl focus:ring-2 focus:ring-emerald-600 bg-white"
+                                                placeholder="Contoh: Dedi Efendi, S.Pd., M.PFis."
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block font-bold text-slate-700 mb-1">NIP / Identitas Pegawai:</label>
+                                            <input 
+                                                type="text" 
+                                                value={userNip} 
+                                                onChange={(e) => setUserNip(e.target.value)} 
+                                                className="w-full border p-2.5 rounded-xl focus:ring-2 focus:ring-emerald-600 bg-white"
+                                                placeholder="Contoh: 198001012005011001"
+                                            />
+                                        </div>
                                     </div>
-                                    <div>
-                                        <label className="block font-bold text-slate-700 mb-1">NIP / Identitas Pegawai:</label>
-                                        <input 
-                                            type="text" 
-                                            value={userNip} 
-                                            onChange={(e) => setUserNip(e.target.value)} 
-                                            className="w-full border p-2.5 rounded-xl focus:ring-2 focus:ring-emerald-600"
-                                            placeholder="Contoh: 197801152003121002"
-                                        />
+
+                                    <div className="space-y-3 bg-emerald-50/60 p-3.5 rounded-xl border border-emerald-200">
+                                        <h4 className="font-bold text-emerald-950 flex items-center gap-1.5">
+                                            <i data-lucide="file-spreadsheet" className="w-4 h-4 text-emerald-700"></i>
+                                            Integrasi Database Google Sheets
+                                        </h4>
+                                        <div>
+                                            <label className="block font-bold text-slate-700 mb-1">URL Web App Google Apps Script:</label>
+                                            <input 
+                                                type="url" 
+                                                value={googleSheetUrl} 
+                                                onChange={(e) => setGoogleSheetUrl(e.target.value)} 
+                                                className="w-full border p-2.5 rounded-xl focus:ring-2 focus:ring-emerald-600 bg-white"
+                                                placeholder="https://script.google.com/macros/s/.../exec"
+                                            />
+                                            <p className="text-[11px] text-slate-500 mt-1">
+                                                Masukkan URL Web App dari Google Apps Script untuk menyimpan data pendampingan secara otomatis ke Google Sheets Anda.
+                                            </p>
+                                        </div>
                                     </div>
+
                                     <div className="flex justify-end gap-2 pt-2">
-                                        <button type="button" onClick={() => setShowProfileModal(false)} className="px-4 py-2 bg-slate-200 text-slate-700 rounded-xl">Batal</button>
-                                        <button type="submit" className="px-4 py-2 bg-emerald-800 text-white font-bold rounded-xl">Simpan Perubahan</button>
+                                        <button type="button" onClick={() => setShowProfileModal(false)} className="px-4 py-2 bg-slate-200 text-slate-700 rounded-xl font-medium">Batal</button>
+                                        <button type="submit" className="px-4 py-2 bg-emerald-800 hover:bg-emerald-900 text-white font-bold rounded-xl shadow">Simpan Perubahan</button>
                                     </div>
                                 </form>
                             </div>
@@ -340,7 +407,7 @@
                     {/* FOOTER */}
                     <footer className="bg-white border-t border-slate-200 py-4 px-6 text-center text-xs text-slate-500 no-print">
                         <p className="font-semibold text-emerald-800">NURANI | Platform Pendampingan Implementasi KBC • Program 1 Pengawas Mendampingi 1 Madrasah Piloting KBC</p>
-                        <p className="mt-1">Dirancang dan dibuat oleh Dedi Efendi, S.Pd., M.PFis.(Pengawas Madrasah Kabupaten Agam Sumatera Barat)</p>
+                        <p className="mt-1">Dibuat oleh Dedi Efendi, S.Pd., M.PFis. (Pengawas Madrasah Kabupaten Agam) berdasarkan Buku Saku Pendampingan Implementasi KBC</p>
                     </footer>
                 </div>
             );
@@ -349,9 +416,25 @@
         // =========================================================================
         // DASHBOARD VIEW
         // =========================================================================
-        function DashboardView({ madrasahList, coachingLogs, currentUser, onStartCoaching, onGoToMadrasah }) {
+        function DashboardView({ madrasahList, coachingLogs, currentUser, googleSheetUrl, onStartCoaching, onGoToMadrasah, onOpenSettings }) {
             return (
                 <div className="space-y-6">
+                    {/* Status Integrasi Banner */}
+                    {!googleSheetUrl && (
+                        <div className="bg-amber-50 border border-amber-300 p-4 rounded-2xl flex flex-col md:flex-row items-start md:items-center justify-between gap-3 text-xs">
+                            <div className="flex items-center gap-2 text-amber-900">
+                                <i data-lucide="info" className="w-5 h-5 text-amber-600 shrink-0"></i>
+                                <div>
+                                    <p className="font-bold">Database Google Sheets Belum Terhubung</p>
+                                    <p className="text-amber-800 text-[11px]">Hubungkan Google Sheet Anda agar seluruh riwayat pendampingan dapat tersimpan otomatis di cloud spreadsheet.</p>
+                                </div>
+                            </div>
+                            <button onClick={onOpenSettings} className="bg-amber-500 hover:bg-amber-600 text-emerald-950 font-bold px-3 py-1.5 rounded-lg shrink-0 transition">
+                                Hubungkan Sekarang
+                            </button>
+                        </div>
+                    )}
+
                     {/* Hero Card */}
                     <div className="bg-gradient-to-r from-emerald-900 via-emerald-800 to-teal-900 text-white p-6 rounded-2xl shadow-xl relative overflow-hidden">
                         <div className="relative z-10 max-w-4xl space-y-3">
@@ -437,7 +520,7 @@
         // =========================================================================
         // COACHING CYCLE VIEW
         // =========================================================================
-        function CoachingCycleView({ madrasahList, selectedMadrasahId, setSelectedMadrasahId, coachingSession, setCoachingSession, handleSaveSession, onGoToMadrasah }) {
+        function CoachingCycleView({ madrasahList, selectedMadrasahId, setSelectedMadrasahId, coachingSession, setCoachingSession, handleSaveSession, isSyncing, googleSheetUrl, onGoToMadrasah }) {
             const [step, setStep] = useState(1);
 
             if (madrasahList.length === 0) {
@@ -608,10 +691,29 @@
                                 <label className="block font-bold mb-1">Umpan Balik Konstruktif Pengawas:</label>
                                 <textarea rows="3" value={coachingSession.umpanBalikKonstruktif} onChange={e => setCoachingSession({...coachingSession, umpanBalikKonstruktif: e.target.value})} className="w-full border p-2.5 rounded-xl" placeholder="Apresiasi & catatan perbaikan..."></textarea>
                             </div>
+
+                            {googleSheetUrl && (
+                                <p className="text-xs text-emerald-700 font-semibold flex items-center gap-1.5 bg-emerald-50 p-2 rounded-lg border border-emerald-200">
+                                    <i data-lucide="check-circle-2" className="w-4 h-4 text-emerald-600"></i>
+                                    Terhubung ke Google Sheets: Data akan dikirim otomatis ke spreadsheet Anda.
+                                </p>
+                            )}
+
                             <div className="flex justify-between pt-2">
                                 <button onClick={() => setStep(3)} className="bg-slate-200 text-slate-700 px-4 py-2 rounded-xl">← Kembali</button>
-                                <button onClick={handleSaveSession} className="bg-amber-500 hover:bg-amber-600 text-emerald-950 font-bold px-6 py-2.5 rounded-xl shadow">
-                                    Simpan Laporan Pendampingan
+                                <button 
+                                    onClick={handleSaveSession} 
+                                    disabled={isSyncing}
+                                    className="bg-amber-500 hover:bg-amber-600 disabled:bg-slate-300 text-emerald-950 font-bold px-6 py-2.5 rounded-xl shadow flex items-center gap-2"
+                                >
+                                    {isSyncing ? (
+                                        <>
+                                            <i data-lucide="loader-2" className="w-4 h-4 animate-spin"></i>
+                                            Menyimpan & Mengirim...
+                                        </>
+                                    ) : (
+                                        'Simpan Laporan Pendampingan'
+                                    )}
                                 </button>
                             </div>
                         </div>
@@ -817,7 +919,7 @@
                                             onChange={e => setFormData({...formData, name: e.target.value})} 
                                             required 
                                             className="w-full border p-2.5 rounded-xl"
-                                            placeholder="Contoh: MIN 1 Kota Banda Aceh"
+                                            placeholder="Contoh: MIN 1 Agam"
                                         />
                                     </div>
                                     <div className="grid grid-cols-2 gap-3">
@@ -875,7 +977,7 @@
         // =========================================================================
         // REPORTS VIEW
         // =========================================================================
-        function ReportsView({ coachingLogs, currentUser, userNip }) {
+        function ReportsView({ coachingLogs, currentUser, userNip, googleSheetUrl }) {
             return (
                 <div className="space-y-6">
                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm no-print">
@@ -885,8 +987,13 @@
                                 Laporan Pendampingan KBC
                             </h2>
                             <p className="text-xs text-slate-500">Pengawas: <span className="font-semibold text-slate-700">{currentUser || 'Belum diatur'}</span> {userNip ? `(NIP: ${userNip})` : ''}</p>
+                            {googleSheetUrl && (
+                                <p className="text-[11px] text-emerald-700 font-medium mt-1 flex items-center gap-1">
+                                    <i data-lucide="check-circle" className="w-3.5 h-3.5 text-emerald-600"></i> Database Cloud: Google Sheets Terhubung
+                                </p>
+                            )}
                         </div>
-                        <button onClick={() => window.print()} className="bg-emerald-800 text-white px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2">
+                        <button onClick={() => window.print()} className="bg-emerald-800 hover:bg-emerald-900 text-white px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 shadow transition">
                             <i data-lucide="printer" className="w-4 h-4"></i> Cetak Laporan
                         </button>
                     </div>
@@ -953,7 +1060,7 @@
                                     value={name}
                                     onChange={(e) => setName(e.target.value)}
                                     required
-                                    placeholder="Contoh: Drs. H. Mulyadi, M.Ag."
+                                    placeholder="Contoh: Dedi Efendi, S.Pd., M.PFis."
                                     className="w-full px-3 py-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-600 focus:outline-none text-slate-800"
                                 />
                             </div>
