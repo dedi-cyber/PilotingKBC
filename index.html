@@ -1,0 +1,988 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NURANI | Platform Pendampingan Implementasi KBC</title>
+    <!-- React & ReactDOM -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+    <!-- Babel JS -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        emerald: {
+                            50: '#f0fdf4',
+                            100: '#dcfce7',
+                            600: '#059669',
+                            700: '#047857',
+                            800: '#065f46',
+                            900: '#064e3b',
+                        },
+                        amber: {
+                            50: '#fffbeb',
+                            100: '#fef3c7',
+                            500: '#f59e0b',
+                            600: '#d97706',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #f8fafc;
+        }
+        @media print {
+            .no-print { display: none !important; }
+            .print-only { display: block !important; }
+            body { background: white; }
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useMemo } = React;
+
+        function App() {
+            const [isAuthenticated, setIsAuthenticated] = useState(() => {
+                return localStorage.getItem('kbc_is_logged_in') === 'true';
+            });
+            const [currentUser, setCurrentUser] = useState(() => {
+                return localStorage.getItem('kbc_user_name') || '';
+            });
+            const [userNip, setUserNip] = useState(() => {
+                return localStorage.getItem('kbc_user_nip') || '';
+            });
+
+            const [activeTab, setActiveTab] = useState('dashboard');
+            
+            // State Madrasah List
+            const [madrasahList, setMadrasahList] = useState(() => {
+                const saved = localStorage.getItem('kbc_madrasah_list');
+                return saved ? JSON.parse(saved) : [];
+            });
+
+            const [selectedMadrasahId, setSelectedMadrasahId] = useState(() => {
+                return madrasahList.length > 0 ? madrasahList[0].id : '';
+            });
+
+            // Modal Edit Profil Pengawas
+            const [showProfileModal, setShowProfileModal] = useState(false);
+
+            // Logging Pendampingan 4 Tahap KBC
+            const [coachingSession, setCoachingSession] = useState({
+                madrasahId: '',
+                teacherName: '',
+                subject: '',
+                date: new Date().toISOString().split('T')[0],
+                activeRole: 'Coach',
+                
+                tahap1_observasiAwal: '',
+                tahap1_magisTarget: 'Terdata di MAGIS Kemenag',
+
+                tahap2_refleksiGuru: '',
+                tahap2_rencanaAksi: '',
+
+                pancaCintaScore: {
+                    cintaAllahRasul: 4,
+                    cintaIlmu: 4,
+                    cintaDiriSesama: 4,
+                    cintaAlamLingkungan: 4,
+                    cintaTanahAir: 4
+                },
+                implementasiNote: '',
+
+                umpanBalikKonstruktif: '',
+                isSyncedToMAGIS: true
+            });
+
+            const [coachingLogs, setCoachingLogs] = useState(() => {
+                const saved = localStorage.getItem('kbc_coaching_logs');
+                return saved ? JSON.parse(saved) : [];
+            });
+
+            useEffect(() => {
+                localStorage.setItem('kbc_madrasah_list', JSON.stringify(madrasahList));
+                if (madrasahList.length > 0 && (!selectedMadrasahId || !madrasahList.find(m => m.id === selectedMadrasahId))) {
+                    setSelectedMadrasahId(madrasahList[0].id);
+                }
+            }, [madrasahList]);
+
+            useEffect(() => {
+                localStorage.setItem('kbc_coaching_logs', JSON.stringify(coachingLogs));
+            }, [coachingLogs]);
+
+            useEffect(() => {
+                if (window.lucide) {
+                    window.lucide.createIcons();
+                }
+            });
+
+            const activeMadrasah = useMemo(() => {
+                return madrasahList.find(m => m.id === selectedMadrasahId) || (madrasahList.length > 0 ? madrasahList[0] : null);
+            }, [madrasahList, selectedMadrasahId]);
+
+            const handleSaveSession = () => {
+                if (!activeMadrasah) {
+                    alert('Silakan tambahkan madrasah binaan terlebih dahulu!');
+                    return;
+                }
+                const newLog = {
+                    ...coachingSession,
+                    id: 'log-' + Date.now(),
+                    madrasahName: activeMadrasah.name,
+                    timestamp: new Date().toLocaleString('id-ID')
+                };
+                setCoachingLogs([newLog, ...coachingLogs]);
+                alert('Sesi Pendampingan KBC 4-Tahap Berhasil Disimpan!');
+                setActiveTab('reports');
+            };
+
+            const handleLogout = () => {
+                setIsAuthenticated(false);
+                localStorage.removeItem('kbc_is_logged_in');
+            };
+
+            const handleLoginSuccess = (name, nip) => {
+                setCurrentUser(name);
+                setUserNip(nip);
+                setIsAuthenticated(true);
+                localStorage.setItem('kbc_is_logged_in', 'true');
+                localStorage.setItem('kbc_user_name', name);
+                localStorage.setItem('kbc_user_nip', nip);
+            };
+
+            const handleUpdateProfile = (e) => {
+                e.preventDefault();
+                localStorage.setItem('kbc_user_name', currentUser);
+                localStorage.setItem('kbc_user_nip', userNip);
+                setShowProfileModal(false);
+                alert('Profil Pengawas Berhasil Diperbarui!');
+            };
+
+            if (!isAuthenticated) {
+                return <LoginView onLogin={handleLoginSuccess} />;
+            }
+
+            return (
+                <div className="min-h-screen flex flex-col bg-slate-50 text-slate-800">
+                    {/* TOP NAVBAR */}
+                    <header className="bg-emerald-900 text-white shadow-lg no-print">
+                        <div className="max-w-7xl mx-auto px-4 py-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                            <div className="flex items-center space-x-3">
+                                <div className="bg-amber-500 p-2.5 rounded-xl text-emerald-950 font-bold shadow-md">
+                                    <i data-lucide="heart-handshake" className="w-7 h-7"></i>
+                                </div>
+                                <div>
+                                    <h1 className="text-xl font-bold tracking-wide flex items-center gap-2">
+                                        NURANI
+                                        <span className="text-xs font-semibold bg-amber-500 text-emerald-950 px-2 py-0.5 rounded-full uppercase">Program 1P1M • Kemenag</span>
+                                    </h1>
+                                    <p className="text-xs text-emerald-200">Platform Pendampingan Implementasi KBC (GTK Kemenag RI)</p>
+                                </div>
+                            </div>
+                            
+                            <div className="flex items-center bg-emerald-800/80 p-1.5 rounded-xl text-xs space-x-1 border border-emerald-700 overflow-x-auto">
+                                <button 
+                                    onClick={() => setActiveTab('dashboard')}
+                                    className={`px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition font-medium ${activeTab === 'dashboard' ? 'bg-amber-500 text-emerald-950 shadow' : 'text-emerald-100 hover:bg-emerald-700'}`}
+                                >
+                                    <i data-lucide="layout-dashboard" className="w-4 h-4"></i> Dashboard
+                                </button>
+                                <button 
+                                    onClick={() => setActiveTab('coaching')}
+                                    className={`px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition font-medium ${activeTab === 'coaching' ? 'bg-amber-500 text-emerald-950 shadow' : 'text-emerald-100 hover:bg-emerald-700'}`}
+                                >
+                                    <i data-lucide="refresh-cw" className="w-4 h-4"></i> Siklus Pendampingan
+                                </button>
+                                <button 
+                                    onClick={() => setActiveTab('instrument')}
+                                    className={`px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition font-medium ${activeTab === 'instrument' ? 'bg-amber-500 text-emerald-950 shadow' : 'text-emerald-100 hover:bg-emerald-700'}`}
+                                >
+                                    <i data-lucide="heart" className="w-4 h-4"></i> Panca Cinta & Peran
+                                </button>
+                                <button 
+                                    onClick={() => setActiveTab('madrasah')}
+                                    className={`px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition font-medium ${activeTab === 'madrasah' ? 'bg-amber-500 text-emerald-950 shadow' : 'text-emerald-100 hover:bg-emerald-700'}`}
+                                >
+                                    <i data-lucide="school" className="w-4 h-4"></i> Kelola Madrasah
+                                </button>
+                                <button 
+                                    onClick={() => setActiveTab('reports')}
+                                    className={`px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition font-medium ${activeTab === 'reports' ? 'bg-amber-500 text-emerald-950 shadow' : 'text-emerald-100 hover:bg-emerald-700'}`}
+                                >
+                                    <i data-lucide="file-check" className="w-4 h-4"></i> Laporan MAGIS
+                                </button>
+
+                                <div className="border-l border-emerald-700 h-5 mx-1"></div>
+                                
+                                <button 
+                                    onClick={() => setShowProfileModal(true)}
+                                    className="flex items-center gap-1.5 px-2 py-1 hover:bg-emerald-700 rounded-lg text-emerald-200 transition"
+                                    title="Klik untuk edit profil"
+                                >
+                                    <i data-lucide="user-check" className="w-4 h-4 text-amber-400 shrink-0"></i>
+                                    <span className="font-semibold text-white max-w-[120px] truncate">{currentUser || 'Pengawas'}</span>
+                                </button>
+
+                                <button 
+                                    onClick={handleLogout}
+                                    className="px-2.5 py-1.5 rounded-lg flex items-center gap-1 transition font-medium bg-red-800/80 hover:bg-red-700 text-white shadow-sm shrink-0"
+                                >
+                                    <i data-lucide="log-out" className="w-3.5 h-3.5"></i> Keluar
+                                </button>
+                            </div>
+                        </div>
+                    </header>
+
+                    {/* MAIN CONTENT AREA */}
+                    <main className="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6">
+                        {activeTab === 'dashboard' && (
+                            <DashboardView 
+                                madrasahList={madrasahList} 
+                                coachingLogs={coachingLogs}
+                                currentUser={currentUser}
+                                onStartCoaching={(mId) => {
+                                    setSelectedMadrasahId(mId);
+                                    setActiveTab('coaching');
+                                }}
+                                onGoToMadrasah={() => setActiveTab('madrasah')}
+                            />
+                        )}
+
+                        {activeTab === 'coaching' && (
+                            <CoachingCycleView 
+                                madrasahList={madrasahList}
+                                selectedMadrasahId={selectedMadrasahId}
+                                setSelectedMadrasahId={setSelectedMadrasahId}
+                                coachingSession={coachingSession}
+                                setCoachingSession={setCoachingSession}
+                                handleSaveSession={handleSaveSession}
+                                onGoToMadrasah={() => setActiveTab('madrasah')}
+                            />
+                        )}
+
+                        {activeTab === 'instrument' && (
+                            <ObservationInstrumentView />
+                        )}
+
+                        {activeTab === 'madrasah' && (
+                            <MadrasahManagerView 
+                                madrasahList={madrasahList}
+                                setMadrasahList={setMadrasahList}
+                            />
+                        )}
+
+                        {activeTab === 'reports' && (
+                            <ReportsView 
+                                coachingLogs={coachingLogs}
+                                currentUser={currentUser}
+                                userNip={userNip}
+                            />
+                        )}
+                    </main>
+
+                    {/* MODAL EDIT PROFIL PENGAWAS */}
+                    {showProfileModal && (
+                        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+                            <div className="bg-white rounded-2xl max-w-md w-full p-6 space-y-4 shadow-xl">
+                                <div className="flex justify-between items-center border-b pb-3">
+                                    <h3 className="font-bold text-slate-800 text-base flex items-center gap-2">
+                                        <i data-lucide="user-cog" className="w-5 h-5 text-emerald-700"></i>
+                                        Edit Profil Pengawas
+                                    </h3>
+                                    <button onClick={() => setShowProfileModal(false)} className="text-slate-400 hover:text-slate-600">✕</button>
+                                </div>
+                                <form onSubmit={handleUpdateProfile} className="space-y-3 text-xs">
+                                    <div>
+                                        <label className="block font-bold text-slate-700 mb-1">Nama Lengkap & Gelar:</label>
+                                        <input 
+                                            type="text" 
+                                            value={currentUser} 
+                                            onChange={(e) => setCurrentUser(e.target.value)} 
+                                            required
+                                            className="w-full border p-2.5 rounded-xl focus:ring-2 focus:ring-emerald-600"
+                                            placeholder="Contoh: Drs. H. Ahmad Sanusi, M.Pd."
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block font-bold text-slate-700 mb-1">NIP / Identitas Pegawai:</label>
+                                        <input 
+                                            type="text" 
+                                            value={userNip} 
+                                            onChange={(e) => setUserNip(e.target.value)} 
+                                            className="w-full border p-2.5 rounded-xl focus:ring-2 focus:ring-emerald-600"
+                                            placeholder="Contoh: 197801152003121002"
+                                        />
+                                    </div>
+                                    <div className="flex justify-end gap-2 pt-2">
+                                        <button type="button" onClick={() => setShowProfileModal(false)} className="px-4 py-2 bg-slate-200 text-slate-700 rounded-xl">Batal</button>
+                                        <button type="submit" className="px-4 py-2 bg-emerald-800 text-white font-bold rounded-xl">Simpan Perubahan</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* FOOTER */}
+                    <footer className="bg-white border-t border-slate-200 py-4 px-6 text-center text-xs text-slate-500 no-print">
+                        <p className="font-semibold text-emerald-800">NURANI | Platform Pendampingan Implementasi KBC • Program 1 Pengawas Mendampingi 1 Madrasah Piloting KBC</p>
+                        <p className="mt-1">Direktorat GTK Madrasah • Direktorat Jenderal Pendidikan Islam Kementerian Agama RI</p>
+                    </footer>
+                </div>
+            );
+        }
+
+        // =========================================================================
+        // DASHBOARD VIEW
+        // =========================================================================
+        function DashboardView({ madrasahList, coachingLogs, currentUser, onStartCoaching, onGoToMadrasah }) {
+            return (
+                <div className="space-y-6">
+                    {/* Hero Card */}
+                    <div className="bg-gradient-to-r from-emerald-900 via-emerald-800 to-teal-900 text-white p-6 rounded-2xl shadow-xl relative overflow-hidden">
+                        <div className="relative z-10 max-w-4xl space-y-3">
+                            <div className="flex flex-wrap items-center gap-2">
+                                <span className="bg-amber-500 text-emerald-950 text-xs font-bold px-3 py-1 rounded-full shadow">
+                                    Program Prioritas Direktur GTK
+                                </span>
+                                <span className="bg-emerald-700/80 text-emerald-100 text-xs px-3 py-1 rounded-full border border-emerald-600">
+                                    Selamat Datang, {currentUser || 'Pengawas Madrasah'}
+                                </span>
+                            </div>
+                            <h2 className="text-2xl md:text-3xl font-bold">Transformasi Paradigma Pengawas Madrasah</h2>
+                            
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-2 text-xs">
+                                <div className="bg-emerald-950/60 p-3 rounded-xl border border-emerald-700/50">
+                                    <p className="text-amber-400 font-bold mb-1">❌ Paradigma Lama (Evaluatif):</p>
+                                    <p className="text-emerald-200">Mengawasi • Memeriksa • Mengontrol • Menilai • Administratif</p>
+                                </div>
+                                <div className="bg-amber-500/20 p-3 rounded-xl border border-amber-500/40">
+                                    <p className="text-amber-300 font-bold mb-1">✨ Paradigma Baru (Transformasional):</p>
+                                    <p className="text-white font-medium">Mendampingi • Memberdayakan • Menginspirasi • Mengembangkan</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Daftar Madrasah Binaan */}
+                    <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                        <div className="flex justify-between items-center mb-4">
+                            <h3 className="text-lg font-bold text-slate-800 flex items-center gap-2">
+                                <i data-lucide="map-pin" className="w-5 h-5 text-emerald-600"></i>
+                                Daftar Madrasah Binaan
+                            </h3>
+                            <button 
+                                onClick={onGoToMadrasah}
+                                className="text-xs bg-emerald-100 hover:bg-emerald-200 text-emerald-800 font-bold px-3 py-1.5 rounded-lg flex items-center gap-1 transition"
+                            >
+                                <i data-lucide="plus" className="w-3.5 h-3.5"></i> Kelola Madrasah
+                            </button>
+                        </div>
+
+                        {madrasahList.length === 0 ? (
+                            <div className="text-center py-8 border-2 border-dashed border-slate-200 rounded-xl space-y-3">
+                                <p className="text-xs text-slate-500">Belum ada madrasah binaan yang ditambahkan.</p>
+                                <button 
+                                    onClick={onGoToMadrasah}
+                                    className="bg-emerald-800 text-white text-xs font-bold px-4 py-2 rounded-xl"
+                                >
+                                    + Tambah Madrasah Sekarang
+                                </button>
+                            </div>
+                        ) : (
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                {madrasahList.map(m => (
+                                    <div key={m.id} className="border border-slate-200 hover:border-emerald-500 rounded-xl p-4 transition bg-slate-50/50 hover:bg-white space-y-3">
+                                        <div className="flex justify-between items-start">
+                                            <span className="bg-emerald-100 text-emerald-800 text-[11px] font-semibold px-2 py-0.5 rounded">
+                                                {m.level} • {m.status}
+                                            </span>
+                                        </div>
+                                        <div>
+                                            <h4 className="font-bold text-slate-800 text-base">{m.name}</h4>
+                                            <p className="text-xs text-slate-500">Kamad: {m.headmaster || '-'}</p>
+                                        </div>
+                                        <p className="text-xs text-slate-600 line-clamp-2 italic bg-white p-2 rounded border border-slate-100">
+                                            "{m.notes || 'Belum ada catatan'}"
+                                        </p>
+                                        <button 
+                                            onClick={() => onStartCoaching(m.id)}
+                                            className="w-full text-xs bg-emerald-800 hover:bg-emerald-900 text-white font-medium py-2 rounded-lg flex items-center justify-center gap-1.5 transition"
+                                        >
+                                            <i data-lucide="refresh-cw" className="w-3.5 h-3.5"></i> Masuk Siklus Pendampingan
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
+        }
+
+        // =========================================================================
+        // COACHING CYCLE VIEW
+        // =========================================================================
+        function CoachingCycleView({ madrasahList, selectedMadrasahId, setSelectedMadrasahId, coachingSession, setCoachingSession, handleSaveSession, onGoToMadrasah }) {
+            const [step, setStep] = useState(1);
+
+            if (madrasahList.length === 0) {
+                return (
+                    <div className="bg-white p-8 rounded-2xl border text-center space-y-4">
+                        <i data-lucide="school" className="w-12 h-12 text-slate-300 mx-auto"></i>
+                        <h3 className="font-bold text-slate-800">Belum Ada Madrasah Binaan</h3>
+                        <p className="text-xs text-slate-500">Silakan tambahkan data madrasah binaan Anda terlebih dahulu sebelum memulai pendampingan.</p>
+                        <button onClick={onGoToMadrasah} className="bg-emerald-800 text-white text-xs font-bold px-4 py-2 rounded-xl">
+                            + Tambah Madrasah Binaan
+                        </button>
+                    </div>
+                );
+            }
+
+            const pancaCintaList = [
+                { key: 'cintaAllahRasul', label: '1. Cinta Allah dan Rasul-Nya' },
+                { key: 'cintaIlmu', label: '2. Cinta Ilmu' },
+                { key: 'cintaDiriSesama', label: '3. Cinta Diri dan Sesama' },
+                { key: 'cintaAlamLingkungan', label: '4. Cinta Alam Lingkungan' },
+                { key: 'cintaTanahAir', label: '5. Cinta Tanah Air' }
+            ];
+
+            return (
+                <div className="space-y-6">
+                    <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 pb-4">
+                            <div>
+                                <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2">
+                                    <i data-lucide="refresh-cw" className="w-6 h-6 text-emerald-600"></i>
+                                    Siklus Implementasi Pendampingan KBC
+                                </h2>
+                                <p className="text-xs text-slate-500">4 Tahapan Resmi Pendampingan KBC Kemenag RI</p>
+                            </div>
+
+                            <div className="flex items-center gap-3">
+                                <label className="text-xs font-semibold text-slate-600">Pilih Madrasah:</label>
+                                <select 
+                                    value={selectedMadrasahId} 
+                                    onChange={(e) => setSelectedMadrasahId(e.target.value)}
+                                    className="bg-slate-100 border border-slate-300 text-xs font-medium rounded-lg p-2 text-slate-800 focus:outline-emerald-600"
+                                >
+                                    {madrasahList.map(m => (
+                                        <option key={m.id} value={m.id}>{m.name}</option>
+                                    ))}
+                                </select>
+                            </div>
+                        </div>
+
+                        {/* Step Indicators */}
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-center text-xs font-medium">
+                            {[1, 2, 3, 4].map((num) => (
+                                <button 
+                                    key={num}
+                                    onClick={() => setStep(num)}
+                                    className={`p-2.5 rounded-xl border flex items-center justify-center gap-1.5 transition ${step === num ? 'bg-emerald-800 text-white font-bold shadow' : 'bg-slate-50 text-slate-600 border-slate-200'}`}
+                                >
+                                    <span className="w-4 h-4 rounded-full bg-white text-emerald-900 font-bold text-[10px] flex items-center justify-center">{num}</span>
+                                    {num === 1 && '1. Perencanaan'}
+                                    {num === 2 && '2. Refleksi & Plan'}
+                                    {num === 3 && '3. Implementasi'}
+                                    {num === 4 && '4. Evaluasi & MAGIS'}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Mode Peran */}
+                    <div className="bg-amber-50 border border-amber-200 p-4 rounded-2xl flex flex-col md:flex-row md:items-center justify-between gap-3 text-xs">
+                        <div className="flex items-center gap-2">
+                            <i data-lucide="user-check" className="w-5 h-5 text-amber-700 shrink-0"></i>
+                            <div>
+                                <p className="font-bold text-amber-900">Mode Peran Pendampingan Saat Ini:</p>
+                                <p className="text-amber-800 text-[11px]">Pilih mode peran sesuai kebutuhan sasaran pendampingan.</p>
+                            </div>
+                        </div>
+                        <div className="flex flex-wrap gap-1">
+                            {['Coach', 'Mentor', 'Trainer', 'Konsultan', 'Konselor'].map(role => (
+                                <button
+                                    key={role}
+                                    onClick={() => setCoachingSession({...coachingSession, activeRole: role})}
+                                    className={`px-3 py-1 rounded-lg text-xs font-bold transition ${coachingSession.activeRole === role ? 'bg-amber-500 text-emerald-950 shadow' : 'bg-white text-slate-600 border border-amber-200'}`}
+                                >
+                                    {role}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Tahap Forms */}
+                    {step === 1 && (
+                        <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4 text-xs">
+                            <h3 className="font-bold text-base text-emerald-900 border-b pb-2">Tahap 1: Perencanaan Pendampingan</h3>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                <div>
+                                    <label className="block font-bold mb-1">Nama Guru Dampingan:</label>
+                                    <input type="text" value={coachingSession.teacherName} onChange={e => setCoachingSession({...coachingSession, teacherName: e.target.value})} className="w-full border p-2.5 rounded-xl" placeholder="Nama Guru" />
+                                </div>
+                                <div>
+                                    <label className="block font-bold mb-1">Mata Pelajaran / Sesi:</label>
+                                    <input type="text" value={coachingSession.subject} onChange={e => setCoachingSession({...coachingSession, subject: e.target.value})} className="w-full border p-2.5 rounded-xl" placeholder="Matpel" />
+                                </div>
+                            </div>
+                            <div>
+                                <label className="block font-bold mb-1">Catatan Observasi Awal:</label>
+                                <textarea rows="3" value={coachingSession.tahap1_observasiAwal} onChange={e => setCoachingSession({...coachingSession, tahap1_observasiAwal: e.target.value})} className="w-full border p-2.5 rounded-xl" placeholder="Catatan kesiapan guru & lingkungan..."></textarea>
+                            </div>
+                            <div className="flex justify-end">
+                                <button onClick={() => setStep(2)} className="bg-emerald-800 text-white font-medium px-4 py-2 rounded-xl">Lanjut ke Tahap 2 →</button>
+                            </div>
+                        </div>
+                    )}
+
+                    {step === 2 && (
+                        <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4 text-xs">
+                            <h3 className="font-bold text-base text-emerald-900 border-b pb-2">Tahap 2: Refleksi & Perencanaan Aksi</h3>
+                            <div>
+                                <label className="block font-bold mb-1">Hasil Refleksi Diri Guru:</label>
+                                <textarea rows="3" value={coachingSession.tahap2_refleksiGuru} onChange={e => setCoachingSession({...coachingSession, tahap2_refleksiGuru: e.target.value})} className="w-full border p-2.5 rounded-xl" placeholder="Refleksi..."></textarea>
+                            </div>
+                            <div>
+                                <label className="block font-bold mb-1">Rencana Aksi KBC:</label>
+                                <input type="text" value={coachingSession.tahap2_rencanaAksi} onChange={e => setCoachingSession({...coachingSession, tahap2_rencanaAksi: e.target.value})} className="w-full border p-2.5 rounded-xl" placeholder="Langkah konkrit yang akan dilakukan..." />
+                            </div>
+                            <div className="flex justify-between">
+                                <button onClick={() => setStep(1)} className="bg-slate-200 text-slate-700 px-4 py-2 rounded-xl">← Kembali</button>
+                                <button onClick={() => setStep(3)} className="bg-emerald-800 text-white font-medium px-4 py-2 rounded-xl">Lanjut ke Tahap 3 →</button>
+                            </div>
+                        </div>
+                    )}
+
+                    {step === 3 && (
+                        <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4 text-xs">
+                            <h3 className="font-bold text-base text-emerald-900 border-b pb-2">Tahap 3: Implementasi (Penilaian 5 Pilar Panca Cinta)</h3>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                {pancaCintaList.map((item) => (
+                                    <div key={item.key} className="border p-3 rounded-xl bg-slate-50 space-y-1">
+                                        <span className="font-bold text-emerald-900">{item.label}</span>
+                                        <input 
+                                            type="range" 
+                                            min="1" 
+                                            max="4" 
+                                            value={coachingSession.pancaCintaScore[item.key]} 
+                                            onChange={e => setCoachingSession({
+                                                ...coachingSession, 
+                                                pancaCintaScore: {
+                                                    ...coachingSession.pancaCintaScore, 
+                                                    [item.key]: parseInt(e.target.value)
+                                                }
+                                            })} 
+                                            className="w-full accent-emerald-700"
+                                        />
+                                        <p className="text-right font-bold text-emerald-800">{coachingSession.pancaCintaScore[item.key]} / 4 Skor</p>
+                                    </div>
+                                ))}
+                            </div>
+                            <div className="flex justify-between">
+                                <button onClick={() => setStep(2)} className="bg-slate-200 text-slate-700 px-4 py-2 rounded-xl">← Kembali</button>
+                                <button onClick={() => setStep(4)} className="bg-emerald-800 text-white font-medium px-4 py-2 rounded-xl">Lanjut ke Tahap 4 →</button>
+                            </div>
+                        </div>
+                    )}
+
+                    {step === 4 && (
+                        <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4 text-xs">
+                            <h3 className="font-bold text-base text-emerald-900 border-b pb-2">Tahap 4: Evaluasi & MAGIS</h3>
+                            <div>
+                                <label className="block font-bold mb-1">Umpan Balik Konstruktif Pengawas:</label>
+                                <textarea rows="3" value={coachingSession.umpanBalikKonstruktif} onChange={e => setCoachingSession({...coachingSession, umpanBalikKonstruktif: e.target.value})} className="w-full border p-2.5 rounded-xl" placeholder="Apresiasi & catatan perbaikan..."></textarea>
+                            </div>
+                            <div className="flex justify-between pt-2">
+                                <button onClick={() => setStep(3)} className="bg-slate-200 text-slate-700 px-4 py-2 rounded-xl">← Kembali</button>
+                                <button onClick={handleSaveSession} className="bg-amber-500 hover:bg-amber-600 text-emerald-950 font-bold px-6 py-2.5 rounded-xl shadow">
+                                    Simpan Laporan Pendampingan
+                                </button>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        // =========================================================================
+        // INSTRUMENT VIEW
+        // =========================================================================
+        function ObservationInstrumentView() {
+            const pancaCintaDetails = [
+                {
+                    title: "1. Cinta Allah dan Rasul-Nya",
+                    icon: "sparkles",
+                    desc: "Mendorong ibadah dan pengamalan ajaran agama atas dasar rasa cinta dan kerinduan, bukan sekadar kewajiban atau taksonomi formal."
+                },
+                {
+                    title: "2. Cinta Ilmu",
+                    icon: "book-open",
+                    desc: "Menumbuhkan antusiasme belajar, diferensiasi pembelajaran, kemauan bernalar kritis, dan growth mindset bagi peserta didik."
+                },
+                {
+                    title: "3. Cinta Diri dan Sesama",
+                    icon: "users",
+                    desc: "Mewujudkan lingkungan belajar yang aman, nyaman, inklusif, ramah anak, serta bebas dari perundungan dan kekerasan."
+                },
+                {
+                    title: "4. Cinta Alam Lingkungan",
+                    icon: "leaf",
+                    desc: "Menanamkan kepedulian terhadap kelestarian ekosistem, ekoteologi, kebersihan, dan pemeliharaan lingkungan madrasah."
+                },
+                {
+                    title: "5. Cinta Tanah Air",
+                    icon: "flag",
+                    desc: "Menumbuhkan rasa bangga, moderasi beragama, jiwa nasionalisme, serta kontribusi nyata bagi kemajuan bangsa dan negara."
+                }
+            ];
+
+            return (
+                <div className="space-y-6">
+                    <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-2">
+                        <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2">
+                            <i data-lucide="heart" className="w-6 h-6 text-emerald-600"></i>
+                            Panduan Instrumen PANCA CINTA & Peran Pengawas
+                        </h2>
+                        <p className="text-xs text-slate-500">Prinsip dasar transformasi mindset dan budaya di madrasah piloting KBC.</p>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {pancaCintaDetails.map((item, idx) => (
+                            <div key={idx} className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-2 text-xs hover:border-emerald-500 transition">
+                                <div className="flex items-center gap-2 text-emerald-800 font-bold text-sm border-b pb-2">
+                                    <i data-lucide={item.icon} className="w-5 h-5 text-amber-500 shrink-0"></i>
+                                    <h3>{item.title}</h3>
+                                </div>
+                                <p className="text-slate-600 leading-relaxed pt-1">{item.desc}</p>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            );
+        }
+
+        // =========================================================================
+        // KELOLA MADRASAH VIEW (KUSTOM & FULL CRUD)
+        // =========================================================================
+        function MadrasahManagerView({ madrasahList, setMadrasahList }) {
+            const [showModal, setShowModal] = useState(false);
+            const [editingId, setEditingId] = useState(null);
+            const [formData, setFormData] = useState({
+                name: '', headmaster: '', level: 'MI', status: 'Piloting Utama', notes: ''
+            });
+
+            const handleOpenAdd = () => {
+                setEditingId(null);
+                setFormData({ name: '', headmaster: '', level: 'MI', status: 'Piloting Utama', notes: '' });
+                setShowModal(true);
+            };
+
+            const handleOpenEdit = (m) => {
+                setEditingId(m.id);
+                setFormData({ name: m.name, headmaster: m.headmaster, level: m.level, status: m.status, notes: m.notes });
+                setShowModal(true);
+            };
+
+            const handleDelete = (id, name) => {
+                if (confirm(`Apakah Anda yakin ingin menghapus madrasah "${name}"?`)) {
+                    setMadrasahList(madrasahList.filter(m => m.id !== id));
+                }
+            };
+
+            const handleClearAll = () => {
+                if (confirm('Apakah Anda yakin ingin menghapus SELURUH data madrasah? Action ini tidak dapat dibatalkan.')) {
+                    setMadrasahList([]);
+                }
+            };
+
+            const handleSubmit = (e) => {
+                e.preventDefault();
+                if(!formData.name.trim()) return;
+
+                if (editingId) {
+                    setMadrasahList(madrasahList.map(m => m.id === editingId ? { ...m, ...formData } : m));
+                } else {
+                    const newItem = {
+                        ...formData,
+                        id: 'm-' + Date.now(),
+                        lastVisit: new Date().toISOString().split('T')[0]
+                    };
+                    setMadrasahList([...madrasahList, newItem]);
+                }
+                setShowModal(false);
+            };
+
+            return (
+                <div className="space-y-6">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                        <div>
+                            <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2">
+                                <i data-lucide="building-2" className="w-6 h-6 text-emerald-600"></i>
+                                Kelola Madrasah Binaan
+                            </h2>
+                            <p className="text-xs text-slate-500">Tambah, ubah, atau hapus daftar madrasah binaan KBC Anda</p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            {madrasahList.length > 0 && (
+                                <button 
+                                    onClick={handleClearAll}
+                                    className="bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 font-bold px-3 py-2 rounded-xl text-xs flex items-center gap-1 transition"
+                                >
+                                    <i data-lucide="trash-2" className="w-4 h-4"></i> Hapus Semua
+                                </button>
+                            )}
+                            <button 
+                                onClick={handleOpenAdd}
+                                className="bg-emerald-800 hover:bg-emerald-900 text-white font-bold px-4 py-2 rounded-xl text-xs flex items-center gap-2 shadow transition"
+                            >
+                                <i data-lucide="plus" className="w-4 h-4"></i> Tambah Madrasah
+                            </button>
+                        </div>
+                    </div>
+
+                    <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                        {madrasahList.length === 0 ? (
+                            <div className="p-8 text-center text-xs text-slate-500 space-y-2">
+                                <p>Belum ada data madrasah. Klik tombol **Tambah Madrasah** untuk memulai.</p>
+                            </div>
+                        ) : (
+                            <div className="overflow-x-auto">
+                                <table className="w-full text-left text-xs text-slate-700">
+                                    <thead className="bg-slate-100 text-slate-800 font-bold uppercase tracking-wider">
+                                        <tr>
+                                            <th className="p-4">Nama Madrasah</th>
+                                            <th className="p-4">Jenjang</th>
+                                            <th className="p-4">Kepala Madrasah</th>
+                                            <th className="p-4">Status</th>
+                                            <th className="p-4">Catatan</th>
+                                            <th className="p-4 text-center">Aksi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-slate-100">
+                                        {madrasahList.map(m => (
+                                            <tr key={m.id} className="hover:bg-slate-50">
+                                                <td className="p-4 font-bold text-slate-800">{m.name}</td>
+                                                <td className="p-4"><span className="bg-slate-200 px-2 py-0.5 rounded font-semibold">{m.level}</span></td>
+                                                <td className="p-4">{m.headmaster || '-'}</td>
+                                                <td className="p-4">
+                                                    <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800">
+                                                        {m.status}
+                                                    </span>
+                                                </td>
+                                                <td className="p-4 text-slate-500 italic max-w-xs truncate">{m.notes || '-'}</td>
+                                                <td className="p-4 text-center space-x-2">
+                                                    <button onClick={() => handleOpenEdit(m)} className="p-1.5 bg-amber-100 hover:bg-amber-200 text-amber-800 rounded-lg font-bold">Edit</button>
+                                                    <button onClick={() => handleDelete(m.id, m.name)} className="p-1.5 bg-rose-100 hover:bg-rose-200 text-rose-800 rounded-lg font-bold">Hapus</button>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Modal Form */}
+                    {showModal && (
+                        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+                            <div className="bg-white rounded-2xl max-w-md w-full p-6 space-y-4 shadow-xl">
+                                <div className="flex justify-between items-center border-b pb-3">
+                                    <h3 className="font-bold text-slate-800 text-base">
+                                        {editingId ? 'Edit Data Madrasah' : 'Tambah Madrasah Binaan'}
+                                    </h3>
+                                    <button onClick={() => setShowModal(false)} className="text-slate-400 hover:text-slate-600">✕</button>
+                                </div>
+                                <form onSubmit={handleSubmit} className="space-y-3 text-xs">
+                                    <div>
+                                        <label className="block font-bold text-slate-700 mb-1">Nama Madrasah:</label>
+                                        <input 
+                                            type="text" 
+                                            value={formData.name} 
+                                            onChange={e => setFormData({...formData, name: e.target.value})} 
+                                            required 
+                                            className="w-full border p-2.5 rounded-xl"
+                                            placeholder="Contoh: MIN 1 Kota Banda Aceh"
+                                        />
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-3">
+                                        <div>
+                                            <label className="block font-bold text-slate-700 mb-1">Jenjang:</label>
+                                            <select value={formData.level} onChange={e => setFormData({...formData, level: e.target.value})} className="w-full border p-2.5 rounded-xl">
+                                                <option value="RA">RA</option>
+                                                <option value="MI">MI</option>
+                                                <option value="MTs">MTs</option>
+                                                <option value="MA">MA</option>
+                                                <option value="MAK">MAK</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label className="block font-bold text-slate-700 mb-1">Status Piloting:</label>
+                                            <select value={formData.status} onChange={e => setFormData({...formData, status: e.target.value})} className="w-full border p-2.5 rounded-xl">
+                                                <option value="Piloting Utama">Piloting Utama (1P1M)</option>
+                                                <option value="Aktif Piloting">Aktif Piloting</option>
+                                                <option value="Persiapan">Persiapan</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label className="block font-bold text-slate-700 mb-1">Nama Kepala Madrasah:</label>
+                                        <input 
+                                            type="text" 
+                                            value={formData.headmaster} 
+                                            onChange={e => setFormData({...formData, headmaster: e.target.value})} 
+                                            className="w-full border p-2.5 rounded-xl"
+                                            placeholder="Nama Kamad & Gelar"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block font-bold text-slate-700 mb-1">Catatan Khusus:</label>
+                                        <textarea 
+                                            rows="2" 
+                                            value={formData.notes} 
+                                            onChange={e => setFormData({...formData, notes: e.target.value})} 
+                                            className="w-full border p-2.5 rounded-xl"
+                                            placeholder="Catatan kondisi/target..."
+                                        ></textarea>
+                                    </div>
+                                    <div className="flex justify-end gap-2 pt-2">
+                                        <button type="button" onClick={() => setShowModal(false)} className="px-4 py-2 bg-slate-200 text-slate-700 rounded-xl">Batal</button>
+                                        <button type="submit" className="px-4 py-2 bg-emerald-800 text-white font-bold rounded-xl">Simpan Data</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        // =========================================================================
+        // REPORTS VIEW
+        // =========================================================================
+        function ReportsView({ coachingLogs, currentUser, userNip }) {
+            return (
+                <div className="space-y-6">
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm no-print">
+                        <div>
+                            <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2">
+                                <i data-lucide="file-check" className="w-6 h-6 text-emerald-600"></i>
+                                Laporan Pendampingan KBC
+                            </h2>
+                            <p className="text-xs text-slate-500">Pengawas: <span className="font-semibold text-slate-700">{currentUser || 'Belum diatur'}</span> {userNip ? `(NIP: ${userNip})` : ''}</p>
+                        </div>
+                        <button onClick={() => window.print()} className="bg-emerald-800 text-white px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2">
+                            <i data-lucide="printer" className="w-4 h-4"></i> Cetak Laporan
+                        </button>
+                    </div>
+
+                    <div className="space-y-4">
+                        {coachingLogs.length === 0 ? (
+                            <div className="bg-white p-8 rounded-2xl border text-center text-xs text-slate-500">
+                                Belum ada riwayat sesi pendampingan tersimpan.
+                            </div>
+                        ) : (
+                            coachingLogs.map((log) => (
+                                <div key={log.id} className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-3">
+                                    <div className="flex justify-between items-start border-b pb-2 text-xs">
+                                        <div>
+                                            <span className="font-bold text-emerald-900 bg-amber-100 px-2 py-0.5 rounded">{log.madrasahName}</span>
+                                            <h4 className="font-bold text-slate-800 text-sm mt-1">{log.subject || 'Sesi Pendampingan KBC'}</h4>
+                                            <p className="text-slate-500">Guru: {log.teacherName || '-'}</p>
+                                        </div>
+                                        <div className="text-right text-slate-400">
+                                            <p>{log.date}</p>
+                                            <p className="text-teal-700 font-bold">Peran: {log.activeRole}</p>
+                                        </div>
+                                    </div>
+                                    <p className="text-xs text-slate-700 bg-slate-50 p-2.5 rounded-xl italic">
+                                        <strong>Umpan Balik:</strong> {log.umpanBalikKonstruktif || 'Tidak ada catatan umpan balik.'}
+                                    </p>
+                                </div>
+                            ))
+                        )}
+                    </div>
+                </div>
+            );
+        }
+
+        // =========================================================================
+        // LOGIN VIEW
+        // =========================================================================
+        function LoginView({ onLogin }) {
+            const [name, setName] = useState('');
+            const [nip, setNip] = useState('');
+
+            const handleSubmit = (e) => {
+                e.preventDefault();
+                if (!name.trim()) return;
+                onLogin(name, nip);
+            };
+
+            return (
+                <div className="min-h-screen bg-gradient-to-br from-emerald-950 via-emerald-900 to-teal-950 flex items-center justify-center p-4">
+                    <div className="w-full max-w-md bg-white rounded-3xl shadow-2xl overflow-hidden">
+                        <div className="bg-gradient-to-r from-emerald-900 to-teal-800 p-8 text-white text-center">
+                            <div className="inline-flex p-3 bg-amber-500 rounded-2xl text-emerald-950 mb-3 shadow-lg">
+                                <i data-lucide="heart-handshake" className="w-8 h-8"></i>
+                            </div>
+                            <h2 className="text-2xl font-bold tracking-tight">NURANI</h2>
+                            <p className="text-emerald-200 text-xs mt-1">Platform Pendampingan Implementasi KBC (Program 1P1M)</p>
+                        </div>
+
+                        <form onSubmit={handleSubmit} className="p-6 md:p-8 space-y-4 text-xs">
+                            <div>
+                                <label className="block font-bold text-slate-700 mb-1.5">Nama Lengkap & Gelar Pengawas:</label>
+                                <input 
+                                    type="text"
+                                    value={name}
+                                    onChange={(e) => setName(e.target.value)}
+                                    required
+                                    placeholder="Contoh: Drs. H. Mulyadi, M.Ag."
+                                    className="w-full px-3 py-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-600 focus:outline-none text-slate-800"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block font-bold text-slate-700 mb-1.5">NIP / Identitas (Opsional):</label>
+                                <input 
+                                    type="text"
+                                    value={nip}
+                                    onChange={(e) => setNip(e.target.value)}
+                                    placeholder="Contoh: 198001012005011001"
+                                    className="w-full px-3 py-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-600 focus:outline-none text-slate-800"
+                                />
+                            </div>
+
+                            <button 
+                                type="submit"
+                                className="w-full bg-emerald-800 hover:bg-emerald-900 text-white font-bold py-3 rounded-xl shadow-lg transition"
+                            >
+                                Masuk ke Portal Pendampingan KBC
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
