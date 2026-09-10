@@ -74,7 +74,7 @@
                     </div>
                     <div>
                         <h1 class="font-bold text-base sm:text-lg tracking-tight leading-tight">NURANI</h1>
-                        <p class="text-[10px] sm:text-xs text-kemenag-lightgold opacity-90">Platform Pendampingan Implementasi KBC</p>
+                        <p class="text-[10px] sm:text-xs text-kemenag-lightgold opacity-90">Platform Pendampingan Implementasi KBC (Intra, Koku, Ekstra & Budaya)</p>
                     </div>
                 </div>
 
@@ -103,7 +103,7 @@
                     <i class="fa-solid fa-rotate text-amber-500"></i> Siklus Pendampingan (4 Tahap)
                 </button>
                 <button onclick="switchTab('instrumen')" id="tab-instrumen" class="tab-btn px-3 py-3 text-xs sm:text-sm font-medium border-b-2 border-transparent text-slate-500 hover:text-slate-700 whitespace-nowrap flex items-center gap-2">
-                    <i class="fa-solid fa-book-open text-blue-500"></i> Panduan Panca Cinta & Peran
+                    <i class="fa-solid fa-book-open text-blue-500"></i> Panduan Ranah & Panca Cinta
                 </button>
                 <button onclick="switchTab('madrasah')" id="tab-madrasah" class="tab-btn px-3 py-3 text-xs sm:text-sm font-medium border-b-2 border-transparent text-slate-500 hover:text-slate-700 whitespace-nowrap flex items-center gap-2">
                     <i class="fa-solid fa-school text-emerald-600"></i> Kelola Madrasah Binaan
@@ -126,7 +126,7 @@
                     <span class="bg-kemenag-gold text-slate-900 text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider">Program 1P1M GTK Kemenag RI</span>
                     <h2 class="text-xl sm:text-2xl font-bold mt-2">Selamat Datang, <span id="dashSupervisorName">Pengawas</span></h2>
                     <p class="text-slate-100 text-xs sm:text-sm mt-1 max-w-2xl leading-relaxed">
-                        Platform NURANI memfasilitasi pendampingan <strong>Kurikulum Berbasis Cinta (KBC)</strong> secara terstruktur. Data tersimpan secara privat & mandiri di browser Anda.
+                        Platform NURANI memfasilitasi pendampingan <strong>Kurikulum Berbasis Cinta (KBC)</strong> secara utuh mencakup ranah <strong>Intrakurikuler, Kokurikuler, Ekstrakurikuler, dan Budaya Madrasah</strong>.
                     </p>
                     <div class="mt-4 flex flex-wrap items-center gap-3 text-xs">
                         <span class="bg-white/20 backdrop-blur-md px-3 py-1 rounded-lg border border-white/20"><i class="fa-solid fa-id-card me-1"></i> NIP: <span id="dashSupervisorNip">-</span></span>
@@ -203,8 +203,9 @@
                         <thead>
                             <tr class="bg-slate-50 text-slate-600 border-b border-slate-200 uppercase font-semibold">
                                 <th class="py-3 px-4">Tanggal</th>
-                                <th class="py-3 px-4">Madrasah & Guru</th>
-                                <th class="py-3 px-4">Mapel</th>
+                                <th class="py-3 px-4">Madrasah & Sasaran</th>
+                                <th class="py-3 px-4">Lingkup KBC</th>
+                                <th class="py-3 px-4">Fokus / Program</th>
                                 <th class="py-3 px-4">Peran</th>
                                 <th class="py-3 px-4 text-center">Skor Panca Cinta</th>
                                 <th class="py-3 px-4 text-center">Aksi Mandiri</th>
@@ -225,13 +226,13 @@
                     <i class="fa-solid fa-rotate text-amber-500"></i>
                     <span>Siklus 4 Tahap Pendampingan KBC</span>
                 </h2>
-                <p class="text-xs text-slate-500 mt-1">Panduan alur resmi pendampingan sesuai petunjuk teknis Direktorat GTK Madrasah Kemenag RI 2026</p>
+                <p class="text-xs text-slate-500 mt-1">Panduan alur resmi pendampingan sesuai petunjuk teknis Direktorat GTK Madrasah Kemenag RI</p>
                 
                 <!-- Stepper Navigation -->
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-2 mt-4">
                     <button onclick="setSiklusStep(1)" id="step-btn-1" class="p-3 text-left rounded-lg border-2 border-kemenag-green bg-emerald-50 transition">
                         <span class="text-[10px] font-bold uppercase text-kemenag-green">Tahap 1</span>
-                        <h4 class="text-xs font-bold text-slate-800">Perencanaan</h4>
+                        <h4 class="text-xs font-bold text-slate-800">Perencanaan & Lingkup</h4>
                     </button>
                     <button onclick="setSiklusStep(2)" id="step-btn-2" class="p-3 text-left rounded-lg border-2 border-slate-200 hover:border-slate-300 transition">
                         <span class="text-[10px] font-bold uppercase text-slate-400">Tahap 2</span>
@@ -254,8 +255,48 @@
                 <div id="step-content-1" class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-4">
                     <h3 class="font-bold text-sm text-slate-800 border-b border-slate-100 pb-2 flex items-center gap-2">
                         <span class="w-6 h-6 bg-kemenag-green text-white rounded-full flex items-center justify-center text-xs">1</span>
-                        Identitas & Perencanaan Pendampingan
+                        Identitas, Ranah & Perencanaan Pendampingan
                     </h3>
+
+                    <!-- LINGKUP IMPLEMENTASI SELECTION -->
+                    <div class="bg-amber-50/60 p-4 rounded-xl border border-amber-200">
+                        <label class="block text-xs font-bold text-amber-900 uppercase mb-2">
+                            <i class="fa-solid fa-layer-group me-1"></i> Pilih Ranah Implementasi KBC yang Didampingi *
+                        </label>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2">
+                            <label class="border border-amber-300 bg-white rounded-lg p-2.5 flex items-start gap-2 cursor-pointer hover:bg-amber-100/50 transition">
+                                <input type="radio" name="lingkupKbc" value="Intrakurikuler" checked onchange="updateFormLabels()" class="mt-0.5 text-kemenag-green focus:ring-kemenag-green">
+                                <div>
+                                    <span class="block font-bold text-xs text-slate-800">Intrakurikuler</span>
+                                    <span class="text-[10px] text-slate-500 leading-tight block mt-0.5">Pembelajaran di Kelas / Mata Pelajaran</span>
+                                </div>
+                            </label>
+
+                            <label class="border border-amber-300 bg-white rounded-lg p-2.5 flex items-start gap-2 cursor-pointer hover:bg-amber-100/50 transition">
+                                <input type="radio" name="lingkupKbc" value="Kokurikuler" onchange="updateFormLabels()" class="mt-0.5 text-kemenag-green focus:ring-kemenag-green">
+                                <div>
+                                    <span class="block font-bold text-xs text-slate-800">Kokurikuler</span>
+                                    <span class="text-[10px] text-slate-500 leading-tight block mt-0.5">Proyek P5 / P2RA / Field Trip / Riset</span>
+                                </div>
+                            </label>
+
+                            <label class="border border-amber-300 bg-white rounded-lg p-2.5 flex items-start gap-2 cursor-pointer hover:bg-amber-100/50 transition">
+                                <input type="radio" name="lingkupKbc" value="Ekstrakurikuler" onchange="updateFormLabels()" class="mt-0.5 text-kemenag-green focus:ring-kemenag-green">
+                                <div>
+                                    <span class="block font-bold text-xs text-slate-800">Ekstrakurikuler</span>
+                                    <span class="text-[10px] text-slate-500 leading-tight block mt-0.5">Pramuka, PMR, Seni, Olahraga, Keagamaan</span>
+                                </div>
+                            </label>
+
+                            <label class="border border-amber-300 bg-white rounded-lg p-2.5 flex items-start gap-2 cursor-pointer hover:bg-amber-100/50 transition">
+                                <input type="radio" name="lingkupKbc" value="Budaya Madrasah" onchange="updateFormLabels()" class="mt-0.5 text-kemenag-green focus:ring-kemenag-green">
+                                <div>
+                                    <span class="block font-bold text-xs text-slate-800">Budaya Madrasah</span>
+                                    <span class="text-[10px] text-slate-500 leading-tight block mt-0.5">Pembiasaan 5S, Shalat, Ekoteologi, Iklim Kasih Sayang</span>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
                     
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
@@ -265,11 +306,11 @@
                             </select>
                         </div>
                         <div>
-                            <label class="block text-xs font-medium text-slate-700 mb-1">Nama Guru Binaan *</label>
+                            <label class="block text-xs font-medium text-slate-700 mb-1" id="lblTeacherName">Nama Guru / Sasaran Binaan *</label>
                             <input type="text" id="sessionTeacher" required placeholder="Contoh: Ahmad Fauzi, S.Pd." class="w-full px-3 py-2 rounded-lg border border-slate-300 text-xs focus:ring-kemenag-green focus:border-kemenag-green">
                         </div>
                         <div>
-                            <label class="block text-xs font-medium text-slate-700 mb-1">Mata Pelajaran *</label>
+                            <label class="block text-xs font-medium text-slate-700 mb-1" id="lblSubject">Mata Pelajaran / Nama Program *</label>
                             <input type="text" id="sessionSubject" required placeholder="Contoh: Akidah Akhlak / Fikih" class="w-full px-3 py-2 rounded-lg border border-slate-300 text-xs focus:ring-kemenag-green focus:border-kemenag-green">
                         </div>
                         <div>
@@ -305,7 +346,7 @@
                     </div>
 
                     <div>
-                        <label class="block text-xs font-medium text-slate-700 mb-1">Catatan Observasi Awal & Bukti Pembelajaran</label>
+                        <label class="block text-xs font-medium text-slate-700 mb-1" id="lblObservasi">Catatan Observasi Awal & Bukti Implementasi KBC</label>
                         <textarea id="tahap1_observasi" rows="3" placeholder="Tuliskan temuan atau data awal sebelum melakukan dialog refleksi..." class="w-full px-3 py-2 rounded-lg border border-slate-300 text-xs focus:ring-kemenag-green focus:border-kemenag-green"></textarea>
                     </div>
 
@@ -320,17 +361,17 @@
                 <div id="step-content-2" class="hidden bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-4">
                     <h3 class="font-bold text-sm text-slate-800 border-b border-slate-100 pb-2 flex items-center gap-2">
                         <span class="w-6 h-6 bg-kemenag-green text-white rounded-full flex items-center justify-center text-xs">2</span>
-                        Pendampingan Refleksi & Perencanaan Aksi Guru
+                        Pendampingan Refleksi & Perencanaan Aksi
                     </h3>
 
                     <div>
-                        <label class="block text-xs font-medium text-slate-700 mb-1">Hasil Refleksi Diri Guru (Fasilitasi Pertanyaan Pemantik)</label>
-                        <textarea id="tahap2_refleksi" rows="3" placeholder="Apa yang sudah berjalan baik? Tantangan apa yang dihadapi guru dalam menerapkan suasana kasih sayang?" class="w-full px-3 py-2 rounded-lg border border-slate-300 text-xs focus:ring-kemenag-green focus:border-kemenag-green"></textarea>
+                        <label class="block text-xs font-medium text-slate-700 mb-1" id="lblRefleksi">Hasil Refleksi Diri Guru / Tim Pelaksana</label>
+                        <textarea id="tahap2_refleksi" rows="3" placeholder="Apa yang sudah berjalan baik? Tantangan apa yang dihadapi dalam menerapkan nilai KBC?" class="w-full px-3 py-2 rounded-lg border border-slate-300 text-xs focus:ring-kemenag-green focus:border-kemenag-green"></textarea>
                     </div>
 
                     <div>
-                        <label class="block text-xs font-medium text-slate-700 mb-1">Rencana Aksi Perbaikan / Inovasi KBC Guru</label>
-                        <textarea id="tahap2_rencana" rows="3" placeholder="Komitmen atau tindakan spesifik yang akan dilakukan guru pada pembelajaran berikutnya..." class="w-full px-3 py-2 rounded-lg border border-slate-300 text-xs focus:ring-kemenag-green focus:border-kemenag-green"></textarea>
+                        <label class="block text-xs font-medium text-slate-700 mb-1" id="lblRencana">Rencana Aksi Perbaikan / Inovasi KBC</label>
+                        <textarea id="tahap2_rencana" rows="3" placeholder="Komitmen atau tindakan spesifik yang akan dilakukan pada siklus berikutnya..." class="w-full px-3 py-2 rounded-lg border border-slate-300 text-xs focus:ring-kemenag-green focus:border-kemenag-green"></textarea>
                     </div>
 
                     <div class="flex justify-between pt-2">
@@ -360,7 +401,7 @@
                                 <span id="val_cintaAllah" class="bg-kemenag-green text-white text-xs font-bold px-2 py-0.5 rounded">4</span>
                             </div>
                             <input type="range" min="1" max="5" value="4" id="score_cintaAllah" oninput="document.getElementById('val_cintaAllah').innerText=this.value" class="w-full accent-kemenag-green cursor-pointer">
-                            <p class="text-[11px] text-slate-500 mt-1">Integrasi nilai keimanan, keteladanan ibadah, dan keikhlasan dalam belajar.</p>
+                            <p class="text-[11px] text-slate-500 mt-1">Keteladanan ibadah, penguatan niat ikhlas, integrasi nilai spiritualitas.</p>
                         </div>
 
                         <!-- Cinta Ilmu -->
@@ -372,7 +413,7 @@
                                 <span id="val_cintaIlmu" class="bg-kemenag-green text-white text-xs font-bold px-2 py-0.5 rounded">4</span>
                             </div>
                             <input type="range" min="1" max="5" value="4" id="score_cintaIlmu" oninput="document.getElementById('val_cintaIlmu').innerText=this.value" class="w-full accent-kemenag-green cursor-pointer">
-                            <p class="text-[11px] text-slate-500 mt-1">Daya kritis, budaya literasi, ketertarikan eksplorasi ilmu pengetahuan.</p>
+                            <p class="text-[11px] text-slate-500 mt-1">Rasa ingin tahu (curiosity), budaya literasi, daya kritis, antusiasme belajar.</p>
                         </div>
 
                         <!-- Cinta Diri & Sesama -->
@@ -384,7 +425,7 @@
                                 <span id="val_cintaDiri" class="bg-kemenag-green text-white text-xs font-bold px-2 py-0.5 rounded">4</span>
                             </div>
                             <input type="range" min="1" max="5" value="4" id="score_cintaDiri" oninput="document.getElementById('val_cintaDiri').innerText=this.value" class="w-full accent-kemenag-green cursor-pointer">
-                            <p class="text-[11px] text-slate-500 mt-1">Empati, saling menghargai, menjaga kesehatan mental & fisik siswa.</p>
+                            <p class="text-[11px] text-slate-500 mt-1">Empati, ramah anak, antibullying, kesehatan mental, apresiasi antarsesama.</p>
                         </div>
 
                         <!-- Cinta Alam Lingkungan -->
@@ -396,7 +437,7 @@
                                 <span id="val_cintaAlam" class="bg-kemenag-green text-white text-xs font-bold px-2 py-0.5 rounded">4</span>
                             </div>
                             <input type="range" min="1" max="5" value="4" id="score_cintaAlam" oninput="document.getElementById('val_cintaAlam').innerText=this.value" class="w-full accent-kemenag-green cursor-pointer">
-                            <p class="text-[11px] text-slate-500 mt-1">Kepedulian ekologis, kebersihan kelas, dan pelestarian lingkungan.</p>
+                            <p class="text-[11px] text-slate-500 mt-1">Kepedulian ekologis, kebersihan kelas/lingkungan, ekoteologi islam.</p>
                         </div>
 
                         <!-- Cinta Tanah Air -->
@@ -408,7 +449,7 @@
                                 <span id="val_cintaTanahAir" class="bg-kemenag-green text-white text-xs font-bold px-2 py-0.5 rounded">4</span>
                             </div>
                             <input type="range" min="1" max="5" value="4" id="score_cintaTanahAir" oninput="document.getElementById('val_cintaTanahAir').innerText=this.value" class="w-full accent-kemenag-green cursor-pointer">
-                            <p class="text-[11px] text-slate-500 mt-1">Moderasi beragama, nasionalisme, kelokalan, dan persatuan kebangsaan.</p>
+                            <p class="text-[11px] text-slate-500 mt-1">Moderasi beragama, jiwa nasionalisme, toleransi, apresiasi kearifan lokal.</p>
                         </div>
                     </div>
 
@@ -431,7 +472,7 @@
 
                     <div>
                         <label class="block text-xs font-medium text-slate-700 mb-1">Umpan Balik Konstruktif Pengawas</label>
-                        <textarea id="tahap4_umpanBalik" rows="4" placeholder="Apresiasi atas perkembangan guru dan rekomendasi tindak lanjut..." class="w-full px-3 py-2 rounded-lg border border-slate-300 text-xs focus:ring-kemenag-green focus:border-kemenag-green"></textarea>
+                        <textarea id="tahap4_umpanBalik" rows="4" placeholder="Apresiasi atas perkembangan guru/tim serta rekomendasi tindak lanjut..." class="w-full px-3 py-2 rounded-lg border border-slate-300 text-xs focus:ring-kemenag-green focus:border-kemenag-green"></textarea>
                     </div>
 
                     <div class="bg-emerald-50 border border-emerald-200 p-4 rounded-xl text-xs text-emerald-900 flex items-start gap-3">
@@ -456,9 +497,39 @@
 
         <!-- TAB 3: PANDUAN INSTRUMEN & PERAN -->
         <section id="content-instrumen" class="hidden space-y-6">
+            <!-- PANDUAN 4 RANAH IMPLEMENTASI KBC -->
+            <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                <h2 class="text-base font-bold text-slate-800 mb-1"><i class="fa-solid fa-shapes text-amber-500 me-2"></i>Panduan 4 Ranah Pendampingan KBC</h2>
+                <p class="text-xs text-slate-500 mb-4">Cakupan implementasi Kurikulum Berbasis Cinta di ekosistem madrasah</p>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div class="p-4 rounded-xl border border-slate-200 bg-emerald-50/50">
+                        <span class="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2 py-0.5 rounded">1. Intrakurikuler</span>
+                        <h4 class="font-bold text-xs text-slate-800 mt-2">Pembelajaran di Kelas</h4>
+                        <p class="text-xs text-slate-600 leading-relaxed mt-1">Integrasi nilai Panca Cinta dalam modul ajar, metode pembelajaran penyayang, suasana kelas tanpa kekerasan, dan asesmen humanis.</p>
+                    </div>
+                    <div class="p-4 rounded-xl border border-slate-200 bg-blue-50/50">
+                        <span class="bg-blue-100 text-blue-800 text-[10px] font-bold px-2 py-0.5 rounded">2. Kokurikuler</span>
+                        <h4 class="font-bold text-xs text-slate-800 mt-2">Proyek P5 / P2RA & Kolaborasi</h4>
+                        <p class="text-xs text-slate-600 leading-relaxed mt-1">Proyek penguatan profil pelajar berkarakter cinta, kegiatan pembelajaran lapangan, riset sosial, dan pameran karya kasih sayang.</p>
+                    </div>
+                    <div class="p-4 rounded-xl border border-slate-200 bg-amber-50/50">
+                        <span class="bg-amber-100 text-amber-800 text-[10px] font-bold px-2 py-0.5 rounded">3. Ekstrakurikuler</span>
+                        <h4 class="font-bold text-xs text-slate-800 mt-2">Bakat, Minat & Keagamaan</h4>
+                        <p class="text-xs text-slate-600 leading-relaxed mt-1">Pramuka, PMR, Olahraga, Kesenian, Tahfizh, dan klub sains yang diselenggarakan dalam semangat persaudaraan dan empati.</p>
+                    </div>
+                    <div class="p-4 rounded-xl border border-slate-200 bg-purple-50/50">
+                        <span class="bg-purple-100 text-purple-800 text-[10px] font-bold px-2 py-0.5 rounded">4. Budaya Madrasah</span>
+                        <h4 class="font-bold text-xs text-slate-800 mt-2">Pembiasaan & Ekosistem</h4>
+                        <p class="text-xs text-slate-600 leading-relaxed mt-1">Pembiasaan 5S (Senyum, Salam, Sapa, Sopan, Santun), shalat berjamaah, kebersihan madrasah, dan tata kelola ramah anak.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PANDUAN 5 PILAR PANCA CINTA KBC -->
             <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
                 <h2 class="text-base font-bold text-slate-800 mb-1"><i class="fa-solid fa-heart text-red-500 me-2"></i>Panduan 5 Pilar PANCA CINTA KBC</h2>
-                <p class="text-xs text-slate-500 mb-4">Indikator pembentukan karakter dan budaya kasih sayang dalam proses pembelajaran di madrasah</p>
+                <p class="text-xs text-slate-500 mb-4">Indikator pembentukan karakter dan budaya kasih sayang dalam seluruh ranah madrasah</p>
                 
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                     <div class="p-4 rounded-xl border border-slate-200 bg-amber-50/50">
@@ -494,14 +565,15 @@
                 </div>
             </div>
 
+            <!-- PANDUAN PERAN PENGAWAS -->
             <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
                 <h2 class="text-base font-bold text-slate-800 mb-1"><i class="fa-solid fa-user-gear text-kemenag-green me-2"></i>Panduan 5 Peran Pengawas Madrasah</h2>
-                <p class="text-xs text-slate-500 mb-4">Model pendekatan adaptif pengawas saat mendampingi kepala madrasah dan guru</p>
+                <p class="text-xs text-slate-500 mb-4">Model pendekatan adaptif pengawas saat mendampingi kepala madrasah, guru, dan tim pelaksana</p>
                 
                 <div class="grid grid-cols-1 md:grid-cols-5 gap-3">
                     <div class="p-3 rounded-lg border border-slate-200 text-xs">
                         <h4 class="font-bold text-kemenag-green mb-1"><i class="fa-solid fa-comments me-1"></i> Coach</h4>
-                        <p class="text-slate-600 text-[11px]">Memfasilitasi refleksi mandiri guru tanpa menggurui melalui pertanyaan terbuka.</p>
+                        <p class="text-slate-600 text-[11px]">Memfasilitasi refleksi mandiri guru/tim tanpa menggurui melalui pertanyaan terbuka.</p>
                     </div>
                     <div class="p-3 rounded-lg border border-slate-200 text-xs">
                         <h4 class="font-bold text-blue-600 mb-1"><i class="fa-solid fa-user-graduate me-1"></i> Mentor</h4>
@@ -509,15 +581,15 @@
                     </div>
                     <div class="p-3 rounded-lg border border-slate-200 text-xs">
                         <h4 class="font-bold text-amber-600 mb-1"><i class="fa-solid fa-chalkboard-user me-1"></i> Trainer</h4>
-                        <p class="text-slate-600 text-[11px]">Memberikan pelatihan terstruktur mengenai teknik pembelajaran KBC.</p>
+                        <p class="text-slate-600 text-[11px]">Memberikan pelatihan terstruktur mengenai teknik implementasi KBC.</p>
                     </div>
                     <div class="p-3 rounded-lg border border-slate-200 text-xs">
                         <h4 class="font-bold text-purple-600 mb-1"><i class="fa-solid fa-lightbulb me-1"></i> Konsultan</h4>
-                        <p class="text-slate-600 text-[11px]">Memberikan saran keahlian mendalam terkait pemecahan kendala kurikulum.</p>
+                        <p class="text-slate-600 text-[11px]">Memberikan saran keahlian mendalam terkait pemecahan kendala program.</p>
                     </div>
                     <div class="p-3 rounded-lg border border-slate-200 text-xs">
                         <h4 class="font-bold text-rose-600 mb-1"><i class="fa-solid fa-hands-holding-child me-1"></i> Konselor</h4>
-                        <p class="text-slate-600 text-[11px]">Mendengarkan aktif dan mendampingi guru dalam mengatasi hambatan emosional.</p>
+                        <p class="text-slate-600 text-[11px]">Mendengarkan aktif dan mendampingi guru/tim dalam mengatasi hambatan emosional.</p>
                     </div>
                 </div>
             </div>
@@ -629,11 +701,11 @@
     <!-- FOOTER -->
     <footer class="bg-white border-t border-slate-200 py-4 mt-auto">
         <div class="max-w-7xl mx-auto px-4 text-center text-slate-500 text-[11px] leading-relaxed">
-            Dibuat oleh <strong>Dedi Efendi, S.Pd., M.PFis.</strong> (Pengawas Madrasah Kabupaten Agam) &bull; Penyimpanan Data Lokal Mandiri (Local Storage)
+            Dibuat oleh <strong>Dedi Efendi, S.Pd., M.PFis.</strong> (Pengawas Madrasah Kabupaten Agam) &bull; Platform NURANI KBC (Intra, Koku, Ekstra & Budaya)
         </div>
     </footer>
 
-    <!-- JAVASCRIPT APP LOGIC (100% LOCAL STORAGE ARCHITECTURE) -->
+    <!-- JAVASCRIPT APP LOGIC -->
     <script>
         /* ==========================================================================
            1. APP STATE MANAGEMENT & INITIALIZATION
@@ -669,13 +741,62 @@
             renderDashboard();
             renderMadrasahList();
             populateMadrasahDropdown();
+            updateFormLabels();
             
             // Set default date
             document.getElementById('sessionDate').valueAsDate = new Date();
         }
 
         /* ==========================================================================
-           2. AUTHENTICATION & PROFILE
+           2. DYNAMIC FORM LABELS ACCORDING TO SCOPE (INTRA, KOKU, EKSTRA, BUDAYA)
+           ========================================================================== */
+        function updateFormLabels() {
+            const lingkup = document.querySelector('input[name="lingkupKbc"]:checked').value;
+            const lblTeacher = document.getElementById('lblTeacherName');
+            const lblSubject = document.getElementById('lblSubject');
+            const txtTeacher = document.getElementById('sessionTeacher');
+            const txtSubject = document.getElementById('sessionSubject');
+            const lblObservasi = document.getElementById('lblObservasi');
+            const lblRefleksi = document.getElementById('lblRefleksi');
+            const lblRencana = document.getElementById('lblRencana');
+
+            if (lingkup === 'Intrakurikuler') {
+                lblTeacher.innerText = 'Nama Guru Binaan *';
+                txtTeacher.placeholder = 'Contoh: Ahmad Fauzi, S.Pd.';
+                lblSubject.innerText = 'Mata Pelajaran *';
+                txtSubject.placeholder = 'Contoh: Akidah Akhlak / Fikih / Matematika';
+                lblObservasi.innerText = 'Catatan Observasi Pembelajaran di Kelas & Modul Ajar';
+                lblRefleksi.innerText = 'Hasil Refleksi Diri Guru Pembelajaran Kelas';
+                lblRencana.innerText = 'Rencana Aksi Perbaikan / Inovasi Pembelajaran Guru';
+            } else if (lingkup === 'Kokurikuler') {
+                lblTeacher.innerText = 'Nama Koordinator / Tim Proyek *';
+                txtTeacher.placeholder = 'Contoh: Tim Koordinator P5RA Kelas VIII';
+                lblSubject.innerText = 'Nama Proyek / Tema Kokurikuler *';
+                txtSubject.placeholder = 'Contoh: Proyek P5 - Budidaya Tanaman Obat Kasih Sayang';
+                lblObservasi.innerText = 'Catatan Observasi Keterlaksanaan Proyek Kokurikuler KBC';
+                lblRefleksi.innerText = 'Hasil Refleksi Tim Proyek Kokurikuler';
+                lblRencana.innerText = 'Rencana Aksi Pengembangan Proyek / Field Trip';
+            } else if (lingkup === 'Ekstrakurikuler') {
+                lblTeacher.innerText = 'Nama Pembina / Pelatih Ekskul *';
+                txtTeacher.placeholder = 'Contoh: Kak Budi (Pembina Pramuka)';
+                lblSubject.innerText = 'Nama Kegiatan Ekstrakurikuler *';
+                txtSubject.placeholder = 'Contoh: Pramuka / PMR / Seni Qasidah / Futsal';
+                lblObservasi.innerText = 'Catatan Observasi Kegiatan Ekstrakurikuler KBC';
+                lblRefleksi.innerText = 'Hasil Refleksi Pembina & Anggota Ekskul';
+                lblRencana.innerText = 'Rencana Aksi Penguatan Karakter Kasih Sayang di Ekskul';
+            } else if (lingkup === 'Budaya Madrasah') {
+                lblTeacher.innerText = 'Penanggung Jawab / Tim Budaya Madrasah *';
+                txtTeacher.placeholder = 'Contoh: Tim Pembiasaan Karakter / Waka Kesiswaan';
+                lblSubject.innerText = 'Fokus Program / Kebiasaan Madrasah *';
+                txtSubject.placeholder = 'Contoh: Pembiasaan 5S / Shalat Dhuha Berjamaah / Lingkungan Asri';
+                lblObservasi.innerText = 'Catatan Observasi Ekosistem & Pembiasaan Budaya Madrasah';
+                lblRefleksi.innerText = 'Hasil Refleksi Tim Penanggung Jawab Budaya Madrasah';
+                lblRencana.innerText = 'Rencana Aksi Pembiasaan & Iklim Kasih Sayang Madrasah';
+            }
+        }
+
+        /* ==========================================================================
+           3. AUTHENTICATION & PROFILE
            ========================================================================== */
         function handleLogin(e) {
             e.preventDefault();
@@ -731,7 +852,7 @@
         }
 
         /* ==========================================================================
-           3. NAVIGATION & TAB SWITCHING
+           4. NAVIGATION & TAB SWITCHING
            ========================================================================== */
         function switchTab(tabId) {
             const tabs = ['dashboard', 'siklus', 'instrumen', 'madrasah'];
@@ -753,7 +874,7 @@
         }
 
         /* ==========================================================================
-           4. SIKLUS PENDAMPINGAN FORM & LOCAL STORAGE LOGIC
+           5. SIKLUS PENDAMPINGAN FORM & LOCAL STORAGE LOGIC
            ========================================================================== */
         function setSiklusStep(step) {
             currentSiklusStep = step;
@@ -780,11 +901,12 @@
             const dateInput = document.getElementById('sessionDate');
 
             if (!madrasahSelect.value || !teacherInput.value || !subjectInput.value || !dateInput.value) {
-                showNotification("Gagal", "Lengkapi data madrasah, guru, mapel, dan tanggal terlebih dahulu.", "error");
+                showNotification("Gagal", "Lengkapi data madrasah, sasaran binaan, program, dan tanggal terlebih dahulu.", "error");
                 setSiklusStep(1);
                 return;
             }
 
+            const lingkupKbc = document.querySelector('input[name="lingkupKbc"]:checked').value;
             const activeRoleElement = document.querySelector('input[name="rolePengawas"]:checked');
             const activeRole = activeRoleElement ? activeRoleElement.value : 'Coach';
 
@@ -793,6 +915,7 @@
                 timestamp: new Date().toLocaleString("id-ID"),
                 supervisorName: currentSupervisor.name,
                 supervisorNip: currentSupervisor.nip,
+                lingkupKbc: lingkupKbc,
                 madrasahName: madrasahSelect.value,
                 teacherName: teacherInput.value,
                 subject: subjectInput.value,
@@ -820,6 +943,7 @@
 
             // Reset Form & Switch Tab
             document.getElementById('formSiklus').reset();
+            updateFormLabels();
             setSiklusStep(1);
             renderDashboard();
             switchTab('dashboard');
@@ -841,7 +965,7 @@
             if (!target) return;
 
             document.getElementById('detailModalTitle').innerText = `${target.madrasahName} - ${target.teacherName}`;
-            document.getElementById('detailModalSubtitle').innerText = `Tanggal: ${target.date} | Mapel: ${target.subject} | Peran: ${target.activeRole}`;
+            document.getElementById('detailModalSubtitle').innerText = `Ranah: ${target.lingkupKbc || 'Intrakurikuler'} | Tgl: ${target.date} | Program: ${target.subject} | Peran: ${target.activeRole}`;
 
             const sc = target.pancaCintaScore || {};
             const avg = (((sc.cintaAllahRasul || 0) + (sc.cintaIlmu || 0) + (sc.cintaDiriSesama || 0) + (sc.cintaAlamLingkungan || 0) + (sc.cintaTanahAir || 0)) / 5).toFixed(1);
@@ -849,8 +973,8 @@
             const html = `
                 <div class="p-3 bg-emerald-50 rounded-lg border border-emerald-200 flex justify-between items-center">
                     <div>
-                        <strong class="text-emerald-900 block font-semibold">Skor Rata-Rata Panca Cinta</strong>
-                        <span class="text-[11px] text-emerald-700">Skala 1 - 5</span>
+                        <span class="bg-emerald-600 text-white font-bold px-2 py-0.5 rounded text-[10px] uppercase">${target.lingkupKbc || 'Intrakurikuler'}</span>
+                        <strong class="text-emerald-900 block font-semibold text-xs mt-1">Skor Rata-Rata Panca Cinta</strong>
                     </div>
                     <span class="text-2xl font-extrabold text-emerald-700">${avg} / 5.0</span>
                 </div>
@@ -865,19 +989,19 @@
 
                 <div class="space-y-2 pt-2 border-t border-slate-100">
                     <div>
-                        <strong class="text-slate-700 block">Tahap 1: Observasi Awal</strong>
+                        <strong class="text-slate-700 block">Tahap 1: Observasi Awal & Bukti KBC</strong>
                         <p class="text-slate-600 bg-slate-50 p-2.5 rounded-lg border mt-1">${target.tahap1_observasiAwal || '<em>Tidak ada catatan</em>'}</p>
                     </div>
                     <div>
-                        <strong class="text-slate-700 block">Tahap 2: Refleksi Guru</strong>
+                        <strong class="text-slate-700 block">Tahap 2: Hasil Refleksi</strong>
                         <p class="text-slate-600 bg-slate-50 p-2.5 rounded-lg border mt-1">${target.tahap2_refleksiGuru || '<em>Tidak ada catatan</em>'}</p>
                     </div>
                     <div>
-                        <strong class="text-slate-700 block">Tahap 2: Rencana Aksi Guru</strong>
+                        <strong class="text-slate-700 block">Tahap 2: Rencana Aksi Perbaikan / Inovasi</strong>
                         <p class="text-slate-600 bg-slate-50 p-2.5 rounded-lg border mt-1">${target.tahap2_rencanaAksi || '<em>Tidak ada catatan</em>'}</p>
                     </div>
                     <div>
-                        <strong class="text-slate-700 block">Tahap 4: Umpan Balik Konsruktif Pengawas</strong>
+                        <strong class="text-slate-700 block">Tahap 4: Umpan Balik Konstruktif Pengawas</strong>
                         <p class="text-slate-600 bg-slate-50 p-2.5 rounded-lg border mt-1">${target.umpanBalikKonstruktif || '<em>Tidak ada umpan balik</em>'}</p>
                     </div>
                 </div>
@@ -892,7 +1016,7 @@
         }
 
         /* ==========================================================================
-           5. EKSPOR & IMPOR DATA (FULL DATA CONTROL)
+           6. EKSPOR & IMPOR DATA (FULL DATA CONTROL)
            ========================================================================== */
         function exportDataJSON() {
             const dataToExport = {
@@ -939,7 +1063,7 @@
         }
 
         /* ==========================================================================
-           6. DASHBOARD & STATS RENDERER
+           7. DASHBOARD & STATS RENDERER
            ========================================================================== */
         function renderDashboard() {
             const sessions = JSON.parse(localStorage.getItem('nurani_sessions')) || [];
@@ -987,7 +1111,7 @@
             if (sessions.length === 0) {
                 tbody.innerHTML = `
                     <tr>
-                        <td colspan="6" class="py-6 text-center text-slate-400">
+                        <td colspan="7" class="py-6 text-center text-slate-400">
                             Belum ada sesi pendampingan yang terekam di Local Storage. Klik tombol "Mulai Pendampingan Baru".
                         </td>
                     </tr>
@@ -999,6 +1123,13 @@
                 const sc = s.pancaCintaScore || {};
                 const avg = (((sc.cintaAllahRasul || 4) + (sc.cintaIlmu || 4) + (sc.cintaDiriSesama || 4) + (sc.cintaAlamLingkungan || 4) + (sc.cintaTanahAir || 4)) / 5).toFixed(1);
 
+                // Badge color based on Lingkup
+                let badgeClass = 'bg-emerald-50 text-emerald-700 border-emerald-200';
+                const l = s.lingkupKbc || 'Intrakurikuler';
+                if (l === 'Kokurikuler') badgeClass = 'bg-blue-50 text-blue-700 border-blue-200';
+                if (l === 'Ekstrakurikuler') badgeClass = 'bg-amber-50 text-amber-700 border-amber-200';
+                if (l === 'Budaya Madrasah') badgeClass = 'bg-purple-50 text-purple-700 border-purple-200';
+
                 const tr = document.createElement('tr');
                 tr.className = 'hover:bg-slate-50 transition';
                 tr.innerHTML = `
@@ -1007,9 +1138,12 @@
                         <strong class="block text-slate-800">${s.madrasahName}</strong>
                         <span class="text-slate-500">${s.teacherName}</span>
                     </td>
+                    <td class="py-3 px-4">
+                        <span class="px-2 py-0.5 rounded font-semibold text-[10px] border ${badgeClass}">${l}</span>
+                    </td>
                     <td class="py-3 px-4 text-slate-600">${s.subject || '-'}</td>
                     <td class="py-3 px-4">
-                        <span class="bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded font-semibold text-[10px]">${s.activeRole || 'Coach'}</span>
+                        <span class="bg-slate-100 text-slate-700 px-2 py-0.5 rounded font-medium text-[10px]">${s.activeRole || 'Coach'}</span>
                     </td>
                     <td class="py-3 px-4 text-center font-bold text-amber-600">${avg}</td>
                     <td class="py-3 px-4 text-center">
@@ -1028,7 +1162,7 @@
         }
 
         /* ==========================================================================
-           7. MADRASAH MANAGEMENT (CRUD)
+           8. MADRASAH MANAGEMENT (CRUD)
            ========================================================================== */
         function renderMadrasahList() {
             const grid = document.getElementById('madrasahListGrid');
@@ -1146,7 +1280,7 @@
         }
 
         /* ==========================================================================
-           8. TOAST NOTIFICATION SYSTEM
+           9. TOAST NOTIFICATION SYSTEM
            ========================================================================== */
         function showNotification(title, message, type = 'info') {
             const toast = document.getElementById('toastNotification');
