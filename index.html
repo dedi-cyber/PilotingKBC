@@ -265,12 +265,12 @@
                         </label>
                         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2">
                             <label class="border border-amber-300 bg-white rounded-lg p-2.5 flex items-start gap-2 cursor-pointer hover:bg-amber-100/50 transition">
-                                <input type="radio" name="lingkupKbc" value="Intrakurikuler" checked onchange="updateFormLabels()" class="mt-0.5 text-kemenag-green focus:ring-kemenag-green">
+                                <input type="radio" name="lingkupKbc" value="Budaya Madrasah" onchange="updateFormLabels()" class="mt-0.5 text-kemenag-green focus:ring-kemenag-green">
                                 <div>
-                                    <span class="block font-bold text-xs text-slate-800">Intrakurikuler</span>
-                                    <span class="text-[10px] text-slate-500 leading-tight block mt-0.5">Pembelajaran di Kelas / Mata Pelajaran</span>
+                                    <span class="block font-bold text-xs text-slate-800">Budaya Madrasah</span>
+                                    <span class="text-[10px] text-slate-500 leading-tight block mt-0.5">Keteladanan 5S+1P, Anti-Bullying, Ekoteologi & Spiritual</span>
                                 </div>
-                            </label>
+                        </label>
 
                             <label class="border border-amber-300 bg-white rounded-lg p-2.5 flex items-start gap-2 cursor-pointer hover:bg-amber-100/50 transition">
                                 <input type="radio" name="lingkupKbc" value="Kokurikuler" onchange="updateFormLabels()" class="mt-0.5 text-kemenag-green focus:ring-kemenag-green">
@@ -520,8 +520,8 @@
                     </div>
                     <div class="p-4 rounded-xl border border-slate-200 bg-purple-50/50">
                         <span class="bg-purple-100 text-purple-800 text-[10px] font-bold px-2 py-0.5 rounded">4. Budaya Madrasah</span>
-                        <h4 class="font-bold text-xs text-slate-800 mt-2">Pembiasaan & Ekosistem</h4>
-                        <p class="text-xs text-slate-600 leading-relaxed mt-1">Pembiasaan 5S (Senyum, Salam, Sapa, Sopan, Santun), shalat berjamaah, kebersihan madrasah, dan tata kelola ramah anak.</p>
+                        <h4 class="font-bold text-xs text-slate-800 mt-2">Ekosistem, Keteladanan & Iklim</h4>
+                        <p class="text-xs text-slate-600 leading-relaxed mt-1">Pembiasaan 5S+1P (Peduli), pencegahan perundungan/kekerasan (TPPM), keteladanan ibadah, kepemimpinan kasih sayang, serta budaya ekoteologi/kebersihan lingkungan.</p>
                     </div>
                 </div>
             </div>
@@ -786,12 +786,12 @@
                 lblRencana.innerText = 'Rencana Aksi Penguatan Karakter Kasih Sayang di Ekskul';
             } else if (lingkup === 'Budaya Madrasah') {
                 lblTeacher.innerText = 'Penanggung Jawab / Tim Budaya Madrasah *';
-                txtTeacher.placeholder = 'Contoh: Tim Pembiasaan Karakter / Waka Kesiswaan';
-                lblSubject.innerText = 'Fokus Program / Kebiasaan Madrasah *';
-                txtSubject.placeholder = 'Contoh: Pembiasaan 5S / Shalat Dhuha Berjamaah / Lingkungan Asri';
-                lblObservasi.innerText = 'Catatan Observasi Ekosistem & Pembiasaan Budaya Madrasah';
-                lblRefleksi.innerText = 'Hasil Refleksi Tim Penanggung Jawab Budaya Madrasah';
-                lblRencana.innerText = 'Rencana Aksi Pembiasaan & Iklim Kasih Sayang Madrasah';
+                txtTeacher.placeholder = 'Contoh: Tim TPPM / Waka Kesiswaan / Tim Karakter';
+                lblSubject.innerText = 'Fokus Program & Iklim Budaya *';
+                txtSubject.placeholder = 'Contoh: Budaya 5S+1P / Anti-Bullying / Shalat Berjamaah / Ekoteologi Adiwiyata';
+                lblObservasi.innerText = 'Catatan Observasi Ekosistem, Keteladanan Guru & Iklim Madrasah Safe/Inclusive';
+                lblRefleksi.innerText = 'Hasil Refleksi Tim Budaya (Pencegahan Kekerasan, Keterlibatan Siswa & Tendik)';
+                lblRencana.innerText = 'Rencana Aksi Pembiasaan Karakter Kasih Sayang & Lingkungan Madrasah Asri';
             }
         }
 
