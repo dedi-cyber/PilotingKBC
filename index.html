@@ -9,7 +9,7 @@
     <!-- FontAwesome for Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Google Fonts: Inter -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <script>
         tailwind.config = {
             theme: {
@@ -30,8 +30,44 @@
             }
         }
     </script>
+    <style>
+        /* Custom scrollbar for horizontal tabs */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        /* Print Media Styles for Official Report Printing */
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            #sessionDetailModal, #sessionDetailModal * {
+                visibility: visible;
+            }
+            #sessionDetailModal {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                height: auto;
+                background: #ffffff !important;
+                padding: 0 !important;
+                box-shadow: none !important;
+            }
+            .no-print {
+                display: none !important;
+            }
+            .print-border {
+                border: 1px solid #cbd5e1 !important;
+            }
+        }
+    </style>
 </head>
-<body class="h-full flex flex-col text-slate-800">
+<body class="h-full flex flex-col text-slate-800 antialiased">
 
     <!-- LOGIN / REGISTER MODAL -->
     <div id="loginModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
@@ -47,11 +83,11 @@
             <form id="loginForm" onsubmit="handleLogin(event)">
                 <div class="space-y-4">
                     <div>
-                        <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Nama Lengkap & Gelar</label>
+                        <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Nama Lengkap & Gelar *</label>
                         <input type="text" id="inputSupervisorName" required class="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-kemenag-green focus:border-kemenag-green text-sm" placeholder="Contoh: Dedi Efendi, S.Pd., M.PFis.">
                     </div>
                     <div>
-                        <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">NIP Pengawas</label>
+                        <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">NIP Pengawas *</label>
                         <input type="text" id="inputSupervisorNip" required class="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-kemenag-green focus:border-kemenag-green text-sm" placeholder="198203152009011002">
                     </div>
                 </div>
@@ -74,7 +110,7 @@
                     </div>
                     <div>
                         <h1 class="font-bold text-base sm:text-lg tracking-tight leading-tight">NURANI</h1>
-                        <p class="text-[10px] sm:text-xs text-kemenag-lightgold opacity-90">Platform Pendampingan Implementasi KBC (Intrakurikuler, Kokurikuler, Ekstrakurikuler & Budaya)</p>
+                        <p class="text-[10px] sm:text-xs text-kemenag-lightgold opacity-90">Platform Pendampingan Implementasi KBC (Intra, Koku, Ekstra & Budaya)</p>
                     </div>
                 </div>
 
@@ -84,7 +120,7 @@
                         <i class="fa-solid fa-user-circle text-kemenag-gold text-sm"></i>
                         <span id="navSupervisorName" class="font-medium hidden sm:inline">Pengawas</span>
                     </button>
-                    <button onclick="handleLogout()" class="text-xs bg-red-500/80 hover:bg-red-600 text-white px-2.5 py-1.5 rounded-lg transition" title="Keluar">
+                    <button onclick="confirmLogout()" class="text-xs bg-red-500/80 hover:bg-red-600 text-white px-2.5 py-1.5 rounded-lg transition" title="Keluar">
                         <i class="fa-solid fa-right-from-bracket"></i>
                     </button>
                 </div>
@@ -130,7 +166,7 @@
                     </p>
                     <div class="mt-4 flex flex-wrap items-center gap-3 text-xs">
                         <span class="bg-white/20 backdrop-blur-md px-3 py-1 rounded-lg border border-white/20"><i class="fa-solid fa-id-card me-1"></i> NIP: <span id="dashSupervisorNip">-</span></span>
-                        <span class="bg-white/20 backdrop-blur-md px-3 py-1 rounded-lg border border-white/20"><i class="fa-solid fa-hard-drive me-1"></i> Storage: <span class="text-emerald-300 font-bold">Local Browser (Privat)</span></span>
+                        <span class="bg-white/20 backdrop-blur-md px-3 py-1 rounded-lg border border-white/20"><i class="fa-solid fa-shield-cat me-1"></i> Mode: <span class="text-emerald-300 font-bold">Privat (XSS Safe & Offline)</span></span>
                     </div>
                 </div>
             </div>
@@ -212,7 +248,7 @@
                             </tr>
                         </thead>
                         <tbody id="tableRecentSessions" class="divide-y divide-slate-100">
-                            <!-- Injected by JS -->
+                            <!-- Injected safely via JS -->
                         </tbody>
                     </table>
                 </div>
@@ -230,19 +266,19 @@
                 
                 <!-- Stepper Navigation -->
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-2 mt-4">
-                    <button onclick="setSiklusStep(1)" id="step-btn-1" class="p-3 text-left rounded-lg border-2 border-kemenag-green bg-emerald-50 transition">
+                    <button type="button" onclick="setSiklusStep(1)" id="step-btn-1" class="p-3 text-left rounded-lg border-2 border-kemenag-green bg-emerald-50 transition">
                         <span class="text-[10px] font-bold uppercase text-kemenag-green">Tahap 1</span>
                         <h4 class="text-xs font-bold text-slate-800">Perencanaan & Lingkup</h4>
                     </button>
-                    <button onclick="setSiklusStep(2)" id="step-btn-2" class="p-3 text-left rounded-lg border-2 border-slate-200 hover:border-slate-300 transition">
+                    <button type="button" onclick="setSiklusStep(2)" id="step-btn-2" class="p-3 text-left rounded-lg border-2 border-slate-200 hover:border-slate-300 transition">
                         <span class="text-[10px] font-bold uppercase text-slate-400">Tahap 2</span>
                         <h4 class="text-xs font-bold text-slate-800">Refleksi & Rencana Aksi</h4>
                     </button>
-                    <button onclick="setSiklusStep(3)" id="step-btn-3" class="p-3 text-left rounded-lg border-2 border-slate-200 hover:border-slate-300 transition">
+                    <button type="button" onclick="setSiklusStep(3)" id="step-btn-3" class="p-3 text-left rounded-lg border-2 border-slate-200 hover:border-slate-300 transition">
                         <span class="text-[10px] font-bold uppercase text-slate-400">Tahap 3</span>
                         <h4 class="text-xs font-bold text-slate-800">Implementasi Panca Cinta</h4>
                     </button>
-                    <button onclick="setSiklusStep(4)" id="step-btn-4" class="p-3 text-left rounded-lg border-2 border-slate-200 hover:border-slate-300 transition">
+                    <button type="button" onclick="setSiklusStep(4)" id="step-btn-4" class="p-3 text-left rounded-lg border-2 border-slate-200 hover:border-slate-300 transition">
                         <span class="text-[10px] font-bold uppercase text-slate-400">Tahap 4</span>
                         <h4 class="text-xs font-bold text-slate-800">Evaluasi & Simpan</h4>
                     </button>
@@ -307,7 +343,7 @@
                         </div>
                         <div>
                             <label class="block text-xs font-medium text-slate-700 mb-1" id="lblTeacherName">Nama Guru / Sasaran Binaan *</label>
-                            <input type="text" id="sessionTeacher" required placeholder="Contoh: Ahmad Fauzi, S.Pd." class="w-full px-3 py-2 rounded-lg border border-slate-300 text-xs focus:ring-kemenag-green focus:border-kemenag-green">
+                            <input type="text" id="sessionTeacher" required placeholder="Contoh: Dedi Efendi, S.Pd., M.PFis." class="w-full px-3 py-2 rounded-lg border border-slate-300 text-xs focus:ring-kemenag-green focus:border-kemenag-green">
                         </div>
                         <div>
                             <label class="block text-xs font-medium text-slate-700 mb-1" id="lblSubject">Mata Pelajaran / Nama Program *</label>
@@ -395,60 +431,60 @@
                         <!-- Cinta Allah -->
                         <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
                             <div class="flex justify-between items-center mb-2">
-                                <label class="font-semibold text-xs text-slate-800 flex items-center gap-1.5">
+                                <label for="score_cintaAllah" class="font-semibold text-xs text-slate-800 flex items-center gap-1.5">
                                     <i class="fa-solid fa-kaaba text-amber-600"></i> 1. Cinta Allah & Rasul-Nya
                                 </label>
                                 <span id="val_cintaAllah" class="bg-kemenag-green text-white text-xs font-bold px-2 py-0.5 rounded">4</span>
                             </div>
-                            <input type="range" min="1" max="5" value="4" id="score_cintaAllah" oninput="document.getElementById('val_cintaAllah').innerText=this.value" class="w-full accent-kemenag-green cursor-pointer">
+                            <input type="range" id="score_cintaAllah" aria-label="Skor Cinta Allah & Rasul-Nya" min="1" max="5" value="4" oninput="document.getElementById('val_cintaAllah').innerText=this.value" class="w-full accent-kemenag-green cursor-pointer">
                             <p class="text-[11px] text-slate-500 mt-1">Keteladanan ibadah, penguatan niat ikhlas, integrasi nilai spiritualitas.</p>
                         </div>
 
                         <!-- Cinta Ilmu -->
                         <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
                             <div class="flex justify-between items-center mb-2">
-                                <label class="font-semibold text-xs text-slate-800 flex items-center gap-1.5">
+                                <label for="score_cintaIlmu" class="font-semibold text-xs text-slate-800 flex items-center gap-1.5">
                                     <i class="fa-solid fa-book-open-reader text-blue-600"></i> 2. Cinta Ilmu
                                 </label>
                                 <span id="val_cintaIlmu" class="bg-kemenag-green text-white text-xs font-bold px-2 py-0.5 rounded">4</span>
                             </div>
-                            <input type="range" min="1" max="5" value="4" id="score_cintaIlmu" oninput="document.getElementById('val_cintaIlmu').innerText=this.value" class="w-full accent-kemenag-green cursor-pointer">
+                            <input type="range" id="score_cintaIlmu" aria-label="Skor Cinta Ilmu" min="1" max="5" value="4" oninput="document.getElementById('val_cintaIlmu').innerText=this.value" class="w-full accent-kemenag-green cursor-pointer">
                             <p class="text-[11px] text-slate-500 mt-1">Rasa ingin tahu (curiosity), budaya literasi, daya kritis, antusiasme belajar.</p>
                         </div>
 
                         <!-- Cinta Diri & Sesama -->
                         <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
                             <div class="flex justify-between items-center mb-2">
-                                <label class="font-semibold text-xs text-slate-800 flex items-center gap-1.5">
+                                <label for="score_cintaDiri" class="font-semibold text-xs text-slate-800 flex items-center gap-1.5">
                                     <i class="fa-solid fa-heart text-red-500"></i> 3. Cinta Diri & Sesama
                                 </label>
                                 <span id="val_cintaDiri" class="bg-kemenag-green text-white text-xs font-bold px-2 py-0.5 rounded">4</span>
                             </div>
-                            <input type="range" min="1" max="5" value="4" id="score_cintaDiri" oninput="document.getElementById('val_cintaDiri').innerText=this.value" class="w-full accent-kemenag-green cursor-pointer">
+                            <input type="range" id="score_cintaDiri" aria-label="Skor Cinta Diri & Sesama" min="1" max="5" value="4" oninput="document.getElementById('val_cintaDiri').innerText=this.value" class="w-full accent-kemenag-green cursor-pointer">
                             <p class="text-[11px] text-slate-500 mt-1">Empati, ramah anak, antibullying, kesehatan mental, apresiasi antarsesama.</p>
                         </div>
 
                         <!-- Cinta Alam Lingkungan -->
                         <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
                             <div class="flex justify-between items-center mb-2">
-                                <label class="font-semibold text-xs text-slate-800 flex items-center gap-1.5">
+                                <label for="score_cintaAlam" class="font-semibold text-xs text-slate-800 flex items-center gap-1.5">
                                     <i class="fa-solid fa-leaf text-emerald-600"></i> 4. Cinta Alam Lingkungan
                                 </label>
                                 <span id="val_cintaAlam" class="bg-kemenag-green text-white text-xs font-bold px-2 py-0.5 rounded">4</span>
                             </div>
-                            <input type="range" min="1" max="5" value="4" id="score_cintaAlam" oninput="document.getElementById('val_cintaAlam').innerText=this.value" class="w-full accent-kemenag-green cursor-pointer">
+                            <input type="range" id="score_cintaAlam" aria-label="Skor Cinta Alam Lingkungan" min="1" max="5" value="4" oninput="document.getElementById('val_cintaAlam').innerText=this.value" class="w-full accent-kemenag-green cursor-pointer">
                             <p class="text-[11px] text-slate-500 mt-1">Kepedulian ekologis, kebersihan kelas/lingkungan, ekoteologi islam.</p>
                         </div>
 
                         <!-- Cinta Tanah Air -->
                         <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 md:col-span-2">
                             <div class="flex justify-between items-center mb-2">
-                                <label class="font-semibold text-xs text-slate-800 flex items-center gap-1.5">
+                                <label for="score_cintaTanahAir" class="font-semibold text-xs text-slate-800 flex items-center gap-1.5">
                                     <i class="fa-solid fa-flag text-red-600"></i> 5. Cinta Tanah Air
                                 </label>
                                 <span id="val_cintaTanahAir" class="bg-kemenag-green text-white text-xs font-bold px-2 py-0.5 rounded">4</span>
                             </div>
-                            <input type="range" min="1" max="5" value="4" id="score_cintaTanahAir" oninput="document.getElementById('val_cintaTanahAir').innerText=this.value" class="w-full accent-kemenag-green cursor-pointer">
+                            <input type="range" id="score_cintaTanahAir" aria-label="Skor Cinta Tanah Air" min="1" max="5" value="4" oninput="document.getElementById('val_cintaTanahAir').innerText=this.value" class="w-full accent-kemenag-green cursor-pointer">
                             <p class="text-[11px] text-slate-500 mt-1">Moderasi beragama, jiwa nasionalisme, toleransi, apresiasi kearifan lokal.</p>
                         </div>
                     </div>
@@ -478,8 +514,8 @@
                     <div class="bg-emerald-50 border border-emerald-200 p-4 rounded-xl text-xs text-emerald-900 flex items-start gap-3">
                         <i class="fa-solid fa-shield-halved text-emerald-600 text-xl mt-0.5"></i>
                         <div>
-                            <strong class="block font-semibold">Penyimpanan Terisolasi & Mandiri:</strong>
-                            <p class="text-emerald-700 mt-0.5">Seluruh data laporan ini hanya tersimpan di memori browser (LocalStorage) HP/Laptop Anda. Bebas dari server eksternal, aman, dan dapat Anda ekspor kapan saja.</p>
+                            <strong class="block font-semibold">Penyimpanan Terisolasi & Aman:</strong>
+                            <p class="text-emerald-700 mt-0.5">Seluruh data laporan ini hanya tersimpan di memori browser (LocalStorage) HP/Laptop Anda. Bebas dari server eksternal, aman dari XSS, dan dapat Anda cetak/ekspor kapan saja.</p>
                         </div>
                     </div>
 
@@ -510,7 +546,7 @@
                     </div>
                     <div class="p-4 rounded-xl border border-slate-200 bg-blue-50/50">
                         <span class="bg-blue-100 text-blue-800 text-[10px] font-bold px-2 py-0.5 rounded">2. Kokurikuler</span>
-                        <h4 class="font-bold text-xs text-slate-800 mt-2">Proyek P5 / P2RA & Kolaborasi</h4>
+                        <h4 class="font-bold text-xs text-slate-800 mt-2">Proyek Kokurikuler & Kolaborasi</h4>
                         <p class="text-xs text-slate-600 leading-relaxed mt-1">Proyek penguatan profil pelajar berkarakter cinta, kegiatan pembelajaran lapangan, riset sosial, dan pameran karya kasih sayang.</p>
                     </div>
                     <div class="p-4 rounded-xl border border-slate-200 bg-amber-50/50">
@@ -607,33 +643,44 @@
                         <button onclick="openMadrasahModal()" class="bg-kemenag-green text-white text-xs font-medium px-4 py-2 rounded-lg hover:bg-kemenag-darkgreen transition flex items-center gap-2">
                             <i class="fa-solid fa-plus"></i> Tambah Madrasah
                         </button>
-                        <button onclick="clearAllMadrasah()" class="bg-red-50 text-red-600 border border-red-200 text-xs font-medium px-3 py-2 rounded-lg hover:bg-red-100 transition" title="Hapus Semua Data Madrasah">
+                        <button onclick="confirmClearAllMadrasah()" class="bg-red-50 text-red-600 border border-red-200 text-xs font-medium px-3 py-2 rounded-lg hover:bg-red-100 transition" title="Hapus Semua Data Madrasah">
                             <i class="fa-solid fa-trash-can"></i> Reset
                         </button>
                     </div>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="madrasahListGrid">
-                    <!-- Injected JS -->
+                    <!-- Injected safely via JS -->
                 </div>
             </div>
         </section>
     </main>
 
-    <!-- DETAIL SESSION MODAL -->
+    <!-- DETAIL SESSION MODAL (WITH CETAK LAPORAN / PDF FEATURE) -->
     <div id="sessionDetailModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 hidden p-4">
-        <div class="bg-white rounded-2xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6 border border-slate-100">
-            <div class="flex justify-between items-center border-b border-slate-100 pb-3 mb-4">
+        <div class="bg-white rounded-2xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6 border border-slate-100 print-border">
+            <!-- Modal Header -->
+            <div class="flex justify-between items-center border-b border-slate-200 pb-3 mb-4">
                 <div>
                     <h3 class="font-bold text-slate-800 text-base" id="detailModalTitle">Detail Sesi Pendampingan</h3>
                     <p class="text-xs text-slate-500" id="detailModalSubtitle">-</p>
                 </div>
-                <button onclick="closeSessionDetailModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+                <div class="flex items-center gap-2 no-print">
+                    <button onclick="printReport()" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-medium transition flex items-center gap-1.5" title="Cetak Laporan / Simpan PDF">
+                        <i class="fa-solid fa-print"></i>
+                        <span>Cetak / PDF</span>
+                    </button>
+                    <button onclick="closeSessionDetailModal()" class="text-slate-400 hover:text-slate-600 p-1"><i class="fa-solid fa-xmark text-lg"></i></button>
+                </div>
             </div>
+
+            <!-- Modal Content Body -->
             <div id="detailModalBody" class="space-y-4 text-xs">
                 <!-- Injected via JS -->
             </div>
-            <div class="pt-4 border-t border-slate-100 flex justify-end gap-2">
+
+            <!-- Modal Footer -->
+            <div class="pt-4 border-t border-slate-100 flex justify-end gap-2 no-print">
                 <button onclick="closeSessionDetailModal()" class="px-4 py-2 bg-slate-100 text-slate-700 rounded-lg text-xs font-semibold">Tutup</button>
             </div>
         </div>
@@ -648,11 +695,11 @@
             </div>
             <form onsubmit="saveProfile(event)" class="space-y-4">
                 <div>
-                    <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Nama Lengkap & Gelar</label>
+                    <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Nama Lengkap & Gelar *</label>
                     <input type="text" id="editSupervisorName" required class="w-full px-3 py-2 rounded-lg border border-slate-300 text-xs">
                 </div>
                 <div>
-                    <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">NIP</label>
+                    <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">NIP *</label>
                     <input type="text" id="editSupervisorNip" required class="w-full px-3 py-2 rounded-lg border border-slate-300 text-xs">
                 </div>
                 <div class="pt-2 flex justify-end gap-2">
@@ -674,7 +721,7 @@
                 <input type="hidden" id="editMadrasahId">
                 <div>
                     <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Nama Madrasah *</label>
-                    <input type="text" id="inputMadrasahName" required placeholder="Contoh: MIN 1 Agam" class="w-full px-3 py-2 rounded-lg border border-slate-300 text-xs">
+                    <input type="text" id="inputMadrasahName" required placeholder="Contoh: MIN 2 Agam" class="w-full px-3 py-2 rounded-lg border border-slate-300 text-xs">
                 </div>
                 <div>
                     <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Nama Kepala Madrasah</label>
@@ -682,7 +729,7 @@
                 </div>
                 <div>
                     <label class="block text-xs font-semibold text-slate-700 uppercase mb-1">Kecamatan / Lokasi</label>
-                    <input type="text" id="inputMadrasahLocation" placeholder="Contoh: Lubuk Basung" class="w-full px-3 py-2 rounded-lg border border-slate-300 text-xs">
+                    <input type="text" id="inputMadrasahLocation" placeholder="Contoh: Kec. Ampek Nagari" class="w-full px-3 py-2 rounded-lg border border-slate-300 text-xs">
                 </div>
                 <div class="pt-2 flex justify-end gap-2">
                     <button type="button" onclick="closeMadrasahModal()" class="px-4 py-2 bg-slate-100 text-slate-600 rounded-lg text-xs font-medium">Batal</button>
@@ -692,8 +739,23 @@
         </div>
     </div>
 
-    <!-- NOTIFICATION TOAST -->
-    <div id="toastNotification" class="fixed bottom-5 right-5 z-50 max-w-xs bg-slate-800 text-white text-xs px-4 py-3 rounded-xl shadow-2xl transition duration-300 transform translate-y-20 opacity-0 flex items-center gap-3">
+    <!-- CUSTOM CONFIRMATION MODAL (Replaces confirm()) -->
+    <div id="confirmModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 hidden p-4">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-6 text-center border border-slate-100">
+            <div class="w-12 h-12 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mx-auto mb-3 text-xl">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <h3 id="confirmTitle" class="font-bold text-slate-800 text-base mb-1">Konfirmasi</h3>
+            <p id="confirmMessage" class="text-xs text-slate-500 mb-5">Apakah Anda yakin ingin melanjutkan tindakan ini?</p>
+            <div class="flex gap-2 justify-center">
+                <button onclick="closeConfirmModal(false)" class="px-4 py-2 bg-slate-100 text-slate-600 rounded-lg text-xs font-semibold hover:bg-slate-200">Batal</button>
+                <button id="confirmBtnAction" class="px-4 py-2 bg-red-600 text-white rounded-lg text-xs font-semibold hover:bg-red-700">Ya, Lanjutkan</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- NOTIFICATION TOAST (Replaces alert()) -->
+    <div id="toastNotification" class="fixed bottom-5 right-5 z-50 max-w-xs bg-slate-800 text-white text-xs px-4 py-3 rounded-xl shadow-2xl transition duration-300 transform translate-y-20 opacity-0 flex items-center gap-3 pointer-events-none">
         <i id="toastIcon" class="fa-solid fa-circle-check text-emerald-400 text-lg"></i>
         <span id="toastMessage">Pesan notifikasi</span>
     </div>
@@ -701,14 +763,55 @@
     <!-- FOOTER -->
     <footer class="bg-white border-t border-slate-200 py-4 mt-auto">
         <div class="max-w-7xl mx-auto px-4 text-center text-slate-500 text-[11px] leading-relaxed">
-            Dibuat oleh <strong>Dedi Efendi, S.Pd., M.PFis.</strong> (Pengawas Madrasah Kabupaten Agam) &bull; Platform NURANI KBC (Intra, Koku, Ekstra & Budaya)
+            Dibuat oleh <strong>Dedi Efendi, S.Pd., M.PFis.</strong> (Pengawas Madrasah di Kantor Kemenag Kab. Agam) &bull; Platform NURANI KBC (Intrakurikuler, Kokurikuler, Ekstrakurikuler & Budaya Madrasah)
         </div>
     </footer>
 
     <!-- JAVASCRIPT APP LOGIC -->
     <script>
         /* ==========================================================================
-           1. APP STATE MANAGEMENT & INITIALIZATION
+           1. UTILITY FUNCTIONS (XSS SANITIZER & SAFE LOCALSTORAGE)
+           ========================================================================== */
+        
+        // Helper XSS Sanitizer to escape plain strings before innerHTML injection
+        function escapeHTML(str) {
+            if (str === null || str === undefined) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
+        // Safe LocalStorage Set Item Wrapper with Error Boundary
+        function safeLocalStorageSet(key, value) {
+            try {
+                localStorage.setItem(key, JSON.stringify(value));
+                return true;
+            } catch (e) {
+                if (e.name === 'QuotaExceededError' || e.code === 22) {
+                    showNotification("Memori Penuh!", "Penyimpanan browser Anda penuh. Segera ekspor cadangan JSON.", "error");
+                } else {
+                    showNotification("Gagal Menyimpan", "Tidak dapat menyimpan data ke memori browser.", "error");
+                }
+                return false;
+            }
+        }
+
+        // Safe LocalStorage Get Item Wrapper
+        function safeLocalStorageGet(key, fallback = []) {
+            try {
+                const item = localStorage.getItem(key);
+                return item ? JSON.parse(item) : fallback;
+            } catch (e) {
+                console.error("Gagal membaca LocalStorage key: " + key, e);
+                return fallback;
+            }
+        }
+
+        /* ==========================================================================
+           2. APP STATE MANAGEMENT & INITIALIZATION
            ========================================================================== */
         let currentSupervisor = {
             name: '',
@@ -716,26 +819,27 @@
         };
 
         let currentSiklusStep = 1;
+        let confirmCallback = null;
 
         function initApp() {
-            // Load supervisor profile
-            const savedSupervisor = localStorage.getItem('nurani_supervisor');
-            if (savedSupervisor) {
-                currentSupervisor = JSON.parse(savedSupervisor);
+            // Load supervisor profile safely
+            const savedSupervisor = safeLocalStorageGet('nurani_supervisor', null);
+            if (savedSupervisor && savedSupervisor.name) {
+                currentSupervisor = savedSupervisor;
                 document.getElementById('loginModal').classList.add('hidden');
                 updateUserInterface();
             } else {
                 document.getElementById('loginModal').classList.remove('hidden');
             }
 
-            // Init default madrasah if empty
-            let madrasahList = JSON.parse(localStorage.getItem('nurani_madrasah')) || [];
+            // Init default madrasah list if empty
+            let madrasahList = safeLocalStorageGet('nurani_madrasah', []);
             if (madrasahList.length === 0) {
                 madrasahList = [
-                    { id: 'm1', name: 'MIN 1 Agam', head: 'Siti Aminah, S.Pd.I', location: 'Lubuk Basung' },
-                    { id: 'm2', name: 'MTsN 2 Agam', head: 'Rahmat Hidayat, M.Ag', location: 'Ampek Angkek' }
+                    { id: 'm1', name: 'MIN 2 Agam', head: 'Trisna Sesriyenti, S.Pd', location: 'Kec. Ampek Nagari' },
+                    { id: 'm2', name: 'MTsN 4 Agam', head: 'Zulherman, S.Ag., M.Pd.', location: 'Kec. Lubuk Basung' }
                 ];
-                localStorage.setItem('nurani_madrasah', JSON.stringify(madrasahList));
+                safeLocalStorageSet('nurani_madrasah', madrasahList);
             }
 
             renderDashboard();
@@ -743,15 +847,20 @@
             populateMadrasahDropdown();
             updateFormLabels();
             
-            // Set default date
-            document.getElementById('sessionDate').valueAsDate = new Date();
+            // Set default date picker
+            const dateInput = document.getElementById('sessionDate');
+            if (dateInput && !dateInput.value) {
+                dateInput.valueAsDate = new Date();
+            }
         }
 
         /* ==========================================================================
-           2. DYNAMIC FORM LABELS ACCORDING TO SCOPE (INTRA, KOKU, EKSTRA, BUDAYA)
+           3. DYNAMIC FORM LABELS ACCORDING TO SCOPE
            ========================================================================== */
         function updateFormLabels() {
-            const lingkup = document.querySelector('input[name="lingkupKbc"]:checked').value;
+            const lingkupEl = document.querySelector('input[name="lingkupKbc"]:checked');
+            const lingkup = lingkupEl ? lingkupEl.value : 'Intrakurikuler';
+
             const lblTeacher = document.getElementById('lblTeacherName');
             const lblSubject = document.getElementById('lblSubject');
             const txtTeacher = document.getElementById('sessionTeacher');
@@ -796,7 +905,7 @@
         }
 
         /* ==========================================================================
-           3. AUTHENTICATION & PROFILE
+           4. AUTHENTICATION & PROFILE
            ========================================================================== */
         function handleLogin(e) {
             e.preventDefault();
@@ -804,23 +913,27 @@
             const nip = document.getElementById('inputSupervisorNip').value.trim();
 
             if (!name || !nip) {
-                showNotification("Gagal", "Harap isi nama dan NIP Anda.", "error");
+                showNotification("Data Inkomplit", "Harap isi nama dan NIP Anda.", "error");
                 return;
             }
 
             currentSupervisor = { name, nip };
-            localStorage.setItem('nurani_supervisor', JSON.stringify(currentSupervisor));
+            safeLocalStorageSet('nurani_supervisor', currentSupervisor);
             
             document.getElementById('loginModal').classList.add('hidden');
             updateUserInterface();
             showNotification("Berhasil", "Selamat datang, " + name, "success");
         }
 
-        function handleLogout() {
-            if (confirm("Apakah Anda yakin ingin keluar dari sesi browser ini? Data tersimpan Anda akan tetap aman di browser ini.")) {
-                localStorage.removeItem('nurani_supervisor');
-                location.reload();
-            }
+        function confirmLogout() {
+            showConfirmModal(
+                "Konfirmasi Keluar",
+                "Apakah Anda yakin ingin keluar? Data Anda tetap aman tersimpan di browser ini.",
+                function() {
+                    localStorage.removeItem('nurani_supervisor');
+                    location.reload();
+                }
+            );
         }
 
         function updateUserInterface() {
@@ -845,14 +958,14 @@
             currentSupervisor.name = document.getElementById('editSupervisorName').value.trim();
             currentSupervisor.nip = document.getElementById('editSupervisorNip').value.trim();
             
-            localStorage.setItem('nurani_supervisor', JSON.stringify(currentSupervisor));
+            safeLocalStorageSet('nurani_supervisor', currentSupervisor);
             updateUserInterface();
             closeProfileModal();
             showNotification("Sukses", "Profil pengawas berhasil diperbarui.", "success");
         }
 
         /* ==========================================================================
-           4. NAVIGATION & TAB SWITCHING
+           5. NAVIGATION & TAB SWITCHING
            ========================================================================== */
         function switchTab(tabId) {
             const tabs = ['dashboard', 'siklus', 'instrumen', 'madrasah'];
@@ -874,15 +987,33 @@
         }
 
         /* ==========================================================================
-           5. SIKLUS PENDAMPINGAN FORM & LOCAL STORAGE LOGIC
+           6. STEPPER FORM & VALIDATION LOGIC
            ========================================================================== */
-        function setSiklusStep(step) {
-            currentSiklusStep = step;
+        function validateStep1() {
+            const madrasahSelect = document.getElementById('sessionMadrasah').value;
+            const teacherInput = document.getElementById('sessionTeacher').value.trim();
+            const subjectInput = document.getElementById('sessionSubject').value.trim();
+            const dateInput = document.getElementById('sessionDate').value;
+
+            if (!madrasahSelect || !teacherInput || !subjectInput || !dateInput) {
+                showNotification("Lengkapi Tahap 1", "Pilih madrasah, sasaran, program, dan tanggal sebelum melanjutkan.", "error");
+                return false;
+            }
+            return true;
+        }
+
+        function setSiklusStep(targetStep) {
+            // Validate step 1 if navigating forward
+            if (targetStep > 1 && currentSiklusStep === 1) {
+                if (!validateStep1()) return;
+            }
+
+            currentSiklusStep = targetStep;
             for (let i = 1; i <= 4; i++) {
                 const content = document.getElementById(`step-content-${i}`);
                 const btn = document.getElementById(`step-btn-${i}`);
                 
-                if (i === step) {
+                if (i === targetStep) {
                     content.classList.remove('hidden');
                     btn.className = "p-3 text-left rounded-lg border-2 border-kemenag-green bg-emerald-50 transition";
                     btn.querySelector('span').className = "text-[10px] font-bold uppercase text-kemenag-green";
@@ -894,17 +1025,19 @@
             }
         }
 
+        /* ==========================================================================
+           7. SIKLUS PENDAMPINGAN DATA PERSISTENCE & PRINTING
+           ========================================================================== */
         function saveSupervisionSession() {
-            const madrasahSelect = document.getElementById('sessionMadrasah');
-            const teacherInput = document.getElementById('sessionTeacher');
-            const subjectInput = document.getElementById('sessionSubject');
-            const dateInput = document.getElementById('sessionDate');
-
-            if (!madrasahSelect.value || !teacherInput.value || !subjectInput.value || !dateInput.value) {
-                showNotification("Gagal", "Lengkapi data madrasah, sasaran binaan, program, dan tanggal terlebih dahulu.", "error");
+            if (!validateStep1()) {
                 setSiklusStep(1);
                 return;
             }
+
+            const madrasahSelect = document.getElementById('sessionMadrasah').value;
+            const teacherInput = document.getElementById('sessionTeacher').value.trim();
+            const subjectInput = document.getElementById('sessionSubject').value.trim();
+            const dateInput = document.getElementById('sessionDate').value;
 
             const lingkupKbc = document.querySelector('input[name="lingkupKbc"]:checked').value;
             const activeRoleElement = document.querySelector('input[name="rolePengawas"]:checked');
@@ -916,10 +1049,10 @@
                 supervisorName: currentSupervisor.name,
                 supervisorNip: currentSupervisor.nip,
                 lingkupKbc: lingkupKbc,
-                madrasahName: madrasahSelect.value,
-                teacherName: teacherInput.value,
-                subject: subjectInput.value,
-                date: dateInput.value,
+                madrasahName: madrasahSelect,
+                teacherName: teacherInput,
+                subject: subjectInput,
+                date: dateInput,
                 activeRole: activeRole,
                 tahap1_observasiAwal: document.getElementById('tahap1_observasi').value,
                 tahap2_refleksiGuru: document.getElementById('tahap2_refleksi').value,
@@ -934,75 +1067,109 @@
                 umpanBalikKonstruktif: document.getElementById('tahap4_umpanBalik').value
             };
 
-            // Save to LocalStorage
-            let sessions = JSON.parse(localStorage.getItem('nurani_sessions')) || [];
+            // Save to LocalStorage safely
+            let sessions = safeLocalStorageGet('nurani_sessions', []);
             sessions.unshift(sessionData);
-            localStorage.setItem('nurani_sessions', JSON.stringify(sessions));
+            
+            if (safeLocalStorageSet('nurani_sessions', sessions)) {
+                showNotification("Tersimpan!", "Laporan sesi pendampingan berhasil disimpan.", "success");
 
-            showNotification("Tersimpan!", "Laporan sesi pendampingan berhasil disimpan di Local Storage Anda.", "success");
+                // Reset Form & Range Sliders Consistency Fix
+                document.getElementById('formSiklus').reset();
+                ['val_cintaAllah', 'val_cintaIlmu', 'val_cintaDiri', 'val_cintaAlam', 'val_cintaTanahAir'].forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.innerText = "4";
+                });
+                ['score_cintaAllah', 'score_cintaIlmu', 'score_cintaDiri', 'score_cintaAlam', 'score_cintaTanahAir'].forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.value = 4;
+                });
 
-            // Reset Form & Switch Tab
-            document.getElementById('formSiklus').reset();
-            updateFormLabels();
-            setSiklusStep(1);
-            renderDashboard();
-            switchTab('dashboard');
-        }
-
-        function deleteSession(id) {
-            if (confirm("Apakah Anda yakin ingin menghapus data sesi pendampingan ini dari Local Storage?")) {
-                let sessions = JSON.parse(localStorage.getItem('nurani_sessions')) || [];
-                sessions = sessions.filter(s => s.id !== id);
-                localStorage.setItem('nurani_sessions', JSON.stringify(sessions));
+                updateFormLabels();
+                setSiklusStep(1);
                 renderDashboard();
-                showNotification("Terhapus", "Data sesi pendampingan berhasil dihapus.", "info");
+                switchTab('dashboard');
             }
         }
 
+        function confirmDeleteSession(id) {
+            showConfirmModal(
+                "Hapus Sesi Pendampingan",
+                "Apakah Anda yakin ingin menghapus data sesi pendampingan ini dari memori browser?",
+                function() {
+                    let sessions = safeLocalStorageGet('nurani_sessions', []);
+                    sessions = sessions.filter(s => s.id !== id);
+                    safeLocalStorageSet('nurani_sessions', sessions);
+                    renderDashboard();
+                    showNotification("Terhapus", "Data sesi pendampingan telah dihapus.", "info");
+                }
+            );
+        }
+
         function viewSessionDetail(id) {
-            const sessions = JSON.parse(localStorage.getItem('nurani_sessions')) || [];
+            const sessions = safeLocalStorageGet('nurani_sessions', []);
             const target = sessions.find(s => s.id === id);
             if (!target) return;
 
+            // XSS Safe Modal Header Text
             document.getElementById('detailModalTitle').innerText = `${target.madrasahName} - ${target.teacherName}`;
             document.getElementById('detailModalSubtitle').innerText = `Ranah: ${target.lingkupKbc || 'Intrakurikuler'} | Tgl: ${target.date} | Program: ${target.subject} | Peran: ${target.activeRole}`;
 
             const sc = target.pancaCintaScore || {};
             const avg = (((sc.cintaAllahRasul || 0) + (sc.cintaIlmu || 0) + (sc.cintaDiriSesama || 0) + (sc.cintaAlamLingkungan || 0) + (sc.cintaTanahAir || 0)) / 5).toFixed(1);
 
+            // Sanitized HTML Body content with escapeHTML()
             const html = `
-                <div class="p-3 bg-emerald-50 rounded-lg border border-emerald-200 flex justify-between items-center">
+                <div class="p-3 bg-emerald-50 rounded-lg border border-emerald-200 flex justify-between items-center mb-3">
                     <div>
-                        <span class="bg-emerald-600 text-white font-bold px-2 py-0.5 rounded text-[10px] uppercase">${target.lingkupKbc || 'Intrakurikuler'}</span>
+                        <span class="bg-emerald-600 text-white font-bold px-2 py-0.5 rounded text-[10px] uppercase">${escapeHTML(target.lingkupKbc || 'Intrakurikuler')}</span>
                         <strong class="text-emerald-900 block font-semibold text-xs mt-1">Skor Rata-Rata Panca Cinta</strong>
                     </div>
                     <span class="text-2xl font-extrabold text-emerald-700">${avg} / 5.0</span>
                 </div>
 
-                <div class="grid grid-cols-2 gap-2 text-[11px]">
-                    <div class="bg-slate-50 p-2 rounded border"><strong>1. Cinta Allah & Rasul:</strong> ${sc.cintaAllahRasul || '-'}</div>
-                    <div class="bg-slate-50 p-2 rounded border"><strong>2. Cinta Ilmu:</strong> ${sc.cintaIlmu || '-'}</div>
-                    <div class="bg-slate-50 p-2 rounded border"><strong>3. Cinta Diri & Sesama:</strong> ${sc.cintaDiriSesama || '-'}</div>
-                    <div class="bg-slate-50 p-2 rounded border"><strong>4. Cinta Alam:</strong> ${sc.cintaAlamLingkungan || '-'}</div>
-                    <div class="bg-slate-50 p-2 rounded border col-span-2"><strong>5. Cinta Tanah Air:</strong> ${sc.cintaTanahAir || '-'}</div>
+                <div class="grid grid-cols-2 gap-2 text-[11px] mb-4">
+                    <div class="bg-slate-50 p-2 rounded border"><strong>1. Cinta Allah & Rasul:</strong> ${sc.cintaAllahRasul || '-'} / 5</div>
+                    <div class="bg-slate-50 p-2 rounded border"><strong>2. Cinta Ilmu:</strong> ${sc.cintaIlmu || '-'} / 5</div>
+                    <div class="bg-slate-50 p-2 rounded border"><strong>3. Cinta Diri & Sesama:</strong> ${sc.cintaDiriSesama || '-'} / 5</div>
+                    <div class="bg-slate-50 p-2 rounded border"><strong>4. Cinta Alam:</strong> ${sc.cintaAlamLingkungan || '-'} / 5</div>
+                    <div class="bg-slate-50 p-2 rounded border col-span-2"><strong>5. Cinta Tanah Air:</strong> ${sc.cintaTanahAir || '-'} / 5</div>
                 </div>
 
-                <div class="space-y-2 pt-2 border-t border-slate-100">
+                <div class="space-y-3 pt-2 border-t border-slate-100">
                     <div>
-                        <strong class="text-slate-700 block">Tahap 1: Observasi Awal & Bukti KBC</strong>
-                        <p class="text-slate-600 bg-slate-50 p-2.5 rounded-lg border mt-1">${target.tahap1_observasiAwal || '<em>Tidak ada catatan</em>'}</p>
+                        <strong class="text-slate-800 block font-semibold">Tahap 1: Observasi Awal & Bukti KBC</strong>
+                        <p class="text-slate-700 bg-slate-50 p-2.5 rounded-lg border mt-1 whitespace-pre-line">${escapeHTML(target.tahap1_observasiAwal) || '<em>Tidak ada catatan</em>'}</p>
                     </div>
                     <div>
-                        <strong class="text-slate-700 block">Tahap 2: Hasil Refleksi</strong>
-                        <p class="text-slate-600 bg-slate-50 p-2.5 rounded-lg border mt-1">${target.tahap2_refleksiGuru || '<em>Tidak ada catatan</em>'}</p>
+                        <strong class="text-slate-800 block font-semibold">Tahap 2: Hasil Refleksi Guru / Tim</strong>
+                        <p class="text-slate-700 bg-slate-50 p-2.5 rounded-lg border mt-1 whitespace-pre-line">${escapeHTML(target.tahap2_refleksiGuru) || '<em>Tidak ada catatan</em>'}</p>
                     </div>
                     <div>
-                        <strong class="text-slate-700 block">Tahap 2: Rencana Aksi Perbaikan / Inovasi</strong>
-                        <p class="text-slate-600 bg-slate-50 p-2.5 rounded-lg border mt-1">${target.tahap2_rencanaAksi || '<em>Tidak ada catatan</em>'}</p>
+                        <strong class="text-slate-800 block font-semibold">Tahap 2: Rencana Aksi Perbaikan / Inovasi</strong>
+                        <p class="text-slate-700 bg-slate-50 p-2.5 rounded-lg border mt-1 whitespace-pre-line">${escapeHTML(target.tahap2_rencanaAksi) || '<em>Tidak ada catatan</em>'}</p>
                     </div>
                     <div>
-                        <strong class="text-slate-700 block">Tahap 4: Umpan Balik Konstruktif Pengawas</strong>
-                        <p class="text-slate-600 bg-slate-50 p-2.5 rounded-lg border mt-1">${target.umpanBalikKonstruktif || '<em>Tidak ada umpan balik</em>'}</p>
+                        <strong class="text-slate-800 block font-semibold">Tahap 4: Umpan Balik Konstruktif Pengawas</strong>
+                        <p class="text-slate-700 bg-slate-50 p-2.5 rounded-lg border mt-1 whitespace-pre-line">${escapeHTML(target.umpanBalikKonstruktif) || '<em>Tidak ada umpan balik</em>'}</p>
+                    </div>
+                </div>
+
+                <!-- Print Signature Footer -->
+                <div class="mt-8 pt-6 border-t border-slate-300 hidden print:block">
+                    <div class="flex justify-between text-xs text-slate-800">
+                        <div class="text-center w-1/2">
+                            <p>Mengetahui,</p>
+                            <p class="font-bold mt-1">Kepala Madrasah / Guru Sasaran</p>
+                            <div class="h-16"></div>
+                            <p class="font-bold underline">${escapeHTML(target.teacherName)}</p>
+                        </div>
+                        <div class="text-center w-1/2">
+                            <p>Pengawas Madrasah Pendamping,</p>
+                            <div class="h-20"></div>
+                            <p class="font-bold underline">${escapeHTML(target.supervisorName || currentSupervisor.name)}</p>
+                            <p class="text-[10px]">NIP. ${escapeHTML(target.supervisorNip || currentSupervisor.nip)}</p>
+                        </div>
                     </div>
                 </div>
             `;
@@ -1015,59 +1182,16 @@
             document.getElementById('sessionDetailModal').classList.add('hidden');
         }
 
-        /* ==========================================================================
-           6. EKSPOR & IMPOR DATA (FULL DATA CONTROL)
-           ========================================================================== */
-        function exportDataJSON() {
-            const dataToExport = {
-                supervisor: JSON.parse(localStorage.getItem('nurani_supervisor')) || {},
-                madrasah: JSON.parse(localStorage.getItem('nurani_madrasah')) || [],
-                sessions: JSON.parse(localStorage.getItem('nurani_sessions')) || [],
-                exportedAt: new Date().toISOString()
-            };
-
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(dataToExport, null, 2));
-            const downloadAnchor = document.createElement('a');
-            downloadAnchor.setAttribute("href", dataStr);
-            downloadAnchor.setAttribute("download", `Backup_NURANI_KBC_${new Date().toISOString().slice(0,10)}.json`);
-            document.body.appendChild(downloadAnchor);
-            downloadAnchor.click();
-            downloadAnchor.remove();
-
-            showNotification("Ekspor Berhasil", "File cadangan JSON berhasil diunduh.", "success");
-        }
-
-        function triggerImportJSON() {
-            document.getElementById('importFileInput').click();
-        }
-
-        function importDataJSON(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    const imported = JSON.parse(e.target.result);
-                    if (imported.madrasah) localStorage.setItem('nurani_madrasah', JSON.stringify(imported.madrasah));
-                    if (imported.sessions) localStorage.setItem('nurani_sessions', JSON.stringify(imported.sessions));
-                    if (imported.supervisor) localStorage.setItem('nurani_supervisor', JSON.stringify(imported.supervisor));
-
-                    initApp();
-                    showNotification("Impor Berhasil!", "Seluruh data pendampingan & madrasah dipulihkan.", "success");
-                } catch (err) {
-                    showNotification("Gagal Impor", "Format file JSON tidak valid.", "error");
-                }
-            };
-            reader.readAsText(file);
+        function printReport() {
+            window.print();
         }
 
         /* ==========================================================================
-           7. DASHBOARD & STATS RENDERER
+           8. DASHBOARD & STATS RENDERER
            ========================================================================== */
         function renderDashboard() {
-            const sessions = JSON.parse(localStorage.getItem('nurani_sessions')) || [];
-            const madrasahList = JSON.parse(localStorage.getItem('nurani_madrasah')) || [];
+            const sessions = safeLocalStorageGet('nurani_sessions', []);
+            const madrasahList = safeLocalStorageGet('nurani_madrasah', []);
 
             // Update Counts
             document.getElementById('statMadrasahCount').innerText = madrasahList.length;
@@ -1104,7 +1228,7 @@
                 document.getElementById('statTopRole').innerText = "Coach";
             }
 
-            // Render Table
+            // Render Table safely with XSS escaping
             const tbody = document.getElementById('tableRecentSessions');
             tbody.innerHTML = '';
 
@@ -1123,7 +1247,6 @@
                 const sc = s.pancaCintaScore || {};
                 const avg = (((sc.cintaAllahRasul || 4) + (sc.cintaIlmu || 4) + (sc.cintaDiriSesama || 4) + (sc.cintaAlamLingkungan || 4) + (sc.cintaTanahAir || 4)) / 5).toFixed(1);
 
-                // Badge color based on Lingkup
                 let badgeClass = 'bg-emerald-50 text-emerald-700 border-emerald-200';
                 const l = s.lingkupKbc || 'Intrakurikuler';
                 if (l === 'Kokurikuler') badgeClass = 'bg-blue-50 text-blue-700 border-blue-200';
@@ -1133,25 +1256,25 @@
                 const tr = document.createElement('tr');
                 tr.className = 'hover:bg-slate-50 transition';
                 tr.innerHTML = `
-                    <td class="py-3 px-4 font-medium text-slate-700">${s.date || '-'}</td>
+                    <td class="py-3 px-4 font-medium text-slate-700">${escapeHTML(s.date) || '-'}</td>
                     <td class="py-3 px-4">
-                        <strong class="block text-slate-800">${s.madrasahName}</strong>
-                        <span class="text-slate-500">${s.teacherName}</span>
+                        <strong class="block text-slate-800">${escapeHTML(s.madrasahName)}</strong>
+                        <span class="text-slate-500">${escapeHTML(s.teacherName)}</span>
                     </td>
                     <td class="py-3 px-4">
-                        <span class="px-2 py-0.5 rounded font-semibold text-[10px] border ${badgeClass}">${l}</span>
+                        <span class="px-2 py-0.5 rounded font-semibold text-[10px] border ${badgeClass}">${escapeHTML(l)}</span>
                     </td>
-                    <td class="py-3 px-4 text-slate-600">${s.subject || '-'}</td>
+                    <td class="py-3 px-4 text-slate-600">${escapeHTML(s.subject) || '-'}</td>
                     <td class="py-3 px-4">
-                        <span class="bg-slate-100 text-slate-700 px-2 py-0.5 rounded font-medium text-[10px]">${s.activeRole || 'Coach'}</span>
+                        <span class="bg-slate-100 text-slate-700 px-2 py-0.5 rounded font-medium text-[10px]">${escapeHTML(s.activeRole) || 'Coach'}</span>
                     </td>
                     <td class="py-3 px-4 text-center font-bold text-amber-600">${avg}</td>
                     <td class="py-3 px-4 text-center">
                         <div class="flex items-center justify-center gap-1">
-                            <button onclick="viewSessionDetail('${s.id}')" class="bg-blue-50 hover:bg-blue-100 text-blue-600 px-2 py-1 rounded text-[11px] font-semibold transition" title="Lihat Detail">
+                            <button onclick="viewSessionDetail('${s.id}')" class="bg-blue-50 hover:bg-blue-100 text-blue-600 px-2 py-1 rounded text-[11px] font-semibold transition" title="Lihat Detail & Cetak">
                                 <i class="fa-solid fa-eye"></i> Detail
                             </button>
-                            <button onclick="deleteSession('${s.id}')" class="bg-red-50 hover:bg-red-100 text-red-600 px-2 py-1 rounded text-[11px] font-semibold transition" title="Hapus Sesi">
+                            <button onclick="confirmDeleteSession('${s.id}')" class="bg-red-50 hover:bg-red-100 text-red-600 px-2 py-1 rounded text-[11px] font-semibold transition" title="Hapus Sesi">
                                 <i class="fa-solid fa-trash"></i>
                             </button>
                         </div>
@@ -1162,11 +1285,11 @@
         }
 
         /* ==========================================================================
-           8. MADRASAH MANAGEMENT (CRUD)
+           9. MADRASAH MANAGEMENT (CRUD)
            ========================================================================== */
         function renderMadrasahList() {
             const grid = document.getElementById('madrasahListGrid');
-            const list = JSON.parse(localStorage.getItem('nurani_madrasah')) || [];
+            const list = safeLocalStorageGet('nurani_madrasah', []);
             grid.innerHTML = '';
 
             if (list.length === 0) {
@@ -1184,14 +1307,14 @@
                 card.innerHTML = `
                     <div>
                         <div class="flex items-start justify-between">
-                            <h4 class="font-bold text-slate-800 text-sm">${m.name}</h4>
+                            <h4 class="font-bold text-slate-800 text-sm">${escapeHTML(m.name)}</h4>
                             <div class="flex items-center gap-1">
-                                <button onclick="editMadrasah('${m.id}')" class="text-slate-400 hover:text-blue-600 text-xs p-1"><i class="fa-solid fa-pen"></i></button>
-                                <button onclick="deleteMadrasah('${m.id}')" class="text-slate-400 hover:text-red-600 text-xs p-1"><i class="fa-solid fa-trash"></i></button>
+                                <button onclick="editMadrasah('${m.id}')" class="text-slate-400 hover:text-blue-600 text-xs p-1" title="Edit"><i class="fa-solid fa-pen"></i></button>
+                                <button onclick="confirmDeleteMadrasah('${m.id}')" class="text-slate-400 hover:text-red-600 text-xs p-1" title="Hapus"><i class="fa-solid fa-trash"></i></button>
                             </div>
                         </div>
-                        <p class="text-xs text-slate-500 mt-2"><i class="fa-solid fa-user-tie me-1"></i> Kamad: ${m.head || '-'}</p>
-                        <p class="text-xs text-slate-500 mt-1"><i class="fa-solid fa-location-dot me-1"></i> Lokasi: ${m.location || '-'}</p>
+                        <p class="text-xs text-slate-500 mt-2"><i class="fa-solid fa-user-tie me-1"></i> Kamad: ${escapeHTML(m.head) || '-'}</p>
+                        <p class="text-xs text-slate-500 mt-1"><i class="fa-solid fa-location-dot me-1"></i> Lokasi: ${escapeHTML(m.location) || '-'}</p>
                     </div>
                 `;
                 grid.appendChild(card);
@@ -1200,7 +1323,7 @@
 
         function populateMadrasahDropdown() {
             const select = document.getElementById('sessionMadrasah');
-            const list = JSON.parse(localStorage.getItem('nurani_madrasah')) || [];
+            const list = safeLocalStorageGet('nurani_madrasah', []);
             select.innerHTML = '<option value="">-- Pilih Madrasah --</option>';
 
             list.forEach(m => {
@@ -1231,7 +1354,7 @@
             const head = document.getElementById('inputMadrasahHead').value.trim();
             const location = document.getElementById('inputMadrasahLocation').value.trim();
 
-            let list = JSON.parse(localStorage.getItem('nurani_madrasah')) || [];
+            let list = safeLocalStorageGet('nurani_madrasah', []);
 
             if (id) {
                 list = list.map(m => m.id === id ? { id, name, head, location } : m);
@@ -1239,15 +1362,16 @@
                 list.push({ id: 'm-' + Date.now(), name, head, location });
             }
 
-            localStorage.setItem('nurani_madrasah', JSON.stringify(list));
-            renderMadrasahList();
-            populateMadrasahDropdown();
-            closeMadrasahModal();
-            showNotification("Sukses", "Data madrasah berhasil disimpan.", "success");
+            if (safeLocalStorageSet('nurani_madrasah', list)) {
+                renderMadrasahList();
+                populateMadrasahDropdown();
+                closeMadrasahModal();
+                showNotification("Sukses", "Data madrasah berhasil disimpan.", "success");
+            }
         }
 
         function editMadrasah(id) {
-            const list = JSON.parse(localStorage.getItem('nurani_madrasah')) || [];
+            const list = safeLocalStorageGet('nurani_madrasah', []);
             const target = list.find(m => m.id === id);
             if (target) {
                 document.getElementById('editMadrasahId').value = target.id;
@@ -1259,29 +1383,103 @@
             }
         }
 
-        function deleteMadrasah(id) {
-            if (confirm("Apakah Anda yakin ingin menghapus madrasah ini dari daftar local storage?")) {
-                let list = JSON.parse(localStorage.getItem('nurani_madrasah')) || [];
-                list = list.filter(m => m.id !== id);
-                localStorage.setItem('nurani_madrasah', JSON.stringify(list));
-                renderMadrasahList();
-                populateMadrasahDropdown();
-                showNotification("Terhapus", "Data madrasah telah dihapus.", "info");
-            }
+        function confirmDeleteMadrasah(id) {
+            showConfirmModal(
+                "Hapus Madrasah",
+                "Apakah Anda yakin ingin menghapus madrasah ini dari daftar?",
+                function() {
+                    let list = safeLocalStorageGet('nurani_madrasah', []);
+                    list = list.filter(m => m.id !== id);
+                    safeLocalStorageSet('nurani_madrasah', list);
+                    renderMadrasahList();
+                    populateMadrasahDropdown();
+                    showNotification("Terhapus", "Data madrasah telah dihapus.", "info");
+                }
+            );
         }
 
-        function clearAllMadrasah() {
-            if (confirm("Apakah Anda yakin ingin menghapus seluruh data madrasah binaan Anda?")) {
-                localStorage.setItem('nurani_madrasah', JSON.stringify([]));
-                renderMadrasahList();
-                populateMadrasahDropdown();
-                showNotification("Reset", "Seluruh data madrasah berhasil dikosongkan.", "info");
-            }
+        function confirmClearAllMadrasah() {
+            showConfirmModal(
+                "Reset Semua Madrasah",
+                "Apakah Anda yakin ingin menghapus SELURUH data madrasah binaan Anda?",
+                function() {
+                    safeLocalStorageSet('nurani_madrasah', []);
+                    renderMadrasahList();
+                    populateMadrasahDropdown();
+                    showNotification("Reset Berhasil", "Seluruh data madrasah telah dikosongkan.", "info");
+                }
+            );
         }
 
         /* ==========================================================================
-           9. TOAST NOTIFICATION SYSTEM
+           10. JSON BACKUP & RESTORE
            ========================================================================== */
+        function exportDataJSON() {
+            const dataToExport = {
+                supervisor: safeLocalStorageGet('nurani_supervisor', {}),
+                madrasah: safeLocalStorageGet('nurani_madrasah', []),
+                sessions: safeLocalStorageGet('nurani_sessions', []),
+                exportedAt: new Date().toISOString()
+            };
+
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(dataToExport, null, 2));
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", `Backup_NURANI_KBC_${new Date().toISOString().slice(0,10)}.json`);
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+
+            showNotification("Ekspor Berhasil", "File cadangan JSON berhasil diunduh.", "success");
+        }
+
+        function triggerImportJSON() {
+            document.getElementById('importFileInput').click();
+        }
+
+        function importDataJSON(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const imported = JSON.parse(e.target.result);
+                    if (imported.madrasah) safeLocalStorageSet('nurani_madrasah', imported.madrasah);
+                    if (imported.sessions) safeLocalStorageSet('nurani_sessions', imported.sessions);
+                    if (imported.supervisor) safeLocalStorageSet('nurani_supervisor', imported.supervisor);
+
+                    initApp();
+                    showNotification("Impor Berhasil!", "Seluruh data pendampingan & madrasah dipulihkan.", "success");
+                } catch (err) {
+                    showNotification("Gagal Impor", "Format file JSON tidak valid.", "error");
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        /* ==========================================================================
+           11. MODAL CONFIRMATION & TOAST NOTIFICATION SYSTEM
+           ========================================================================== */
+        function showConfirmModal(title, message, onConfirm) {
+            document.getElementById('confirmTitle').innerText = title;
+            document.getElementById('confirmMessage').innerText = message;
+            confirmCallback = onConfirm;
+            
+            const btn = document.getElementById('confirmBtnAction');
+            btn.onclick = function() {
+                if (confirmCallback) confirmCallback();
+                closeConfirmModal(true);
+            };
+
+            document.getElementById('confirmModal').classList.remove('hidden');
+        }
+
+        function closeConfirmModal() {
+            document.getElementById('confirmModal').classList.add('hidden');
+            confirmCallback = null;
+        }
+
         function showNotification(title, message, type = 'info') {
             const toast = document.getElementById('toastNotification');
             const toastMsg = document.getElementById('toastMessage');
@@ -1301,10 +1499,10 @@
             
             setTimeout(() => {
                 toast.classList.add('translate-y-20', 'opacity-0');
-            }, 3000);
+            }, 3200);
         }
 
-        // Initialize application on page load
+        // Initialize application on window load
         window.onload = initApp;
     </script>
 </body>
